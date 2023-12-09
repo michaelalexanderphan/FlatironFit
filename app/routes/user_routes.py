@@ -53,7 +53,6 @@ def update_user(user_id):
     data = request.json
     user.username = data.get('username', user.username)
     user.email = data.get('email', user.email)
-    # Handle password update with care (hash new password)
     if 'password' in data:
         user.set_password(data['password'])
 
@@ -72,5 +71,3 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({"msg": "User deleted successfully"}), 200
-
-# Additional user-related routes can be added here
