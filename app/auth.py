@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.user import User
 from app import db
@@ -19,8 +19,8 @@ def register():
     if User.query.filter((User.username == username) | (User.email == email)).first():
         return jsonify({"msg": "Username or email already exists"}), 409
 
-    new_user = User(username=username, email=email, role=role)
-    new_user.set_password(password)
+    hashed_password = generate_password_hash(password)
+    new_user = User(username=username, email=email, role=role, password_hash=hashed_password)
     db.session.add(new_user)
     db.session.commit()
 
@@ -30,7 +30,7 @@ def register():
 def login():
     username = request.json.get('username', None)
     password = request.json.get('password', None)
-    
+
     if not username or not password:
         return jsonify({"msg": "Missing username or password"}), 400
 
@@ -39,7 +39,7 @@ def login():
         access_token = create_access_token(identity=username)
         refresh_token = create_refresh_token(identity=username)
         return jsonify(access_token=access_token, refresh_token=refresh_token), 200
-    
+
     return jsonify({"msg": "Bad username or password"}), 401
 
 @auth_bp.route('/token/refresh', methods=['POST'])
@@ -49,4 +49,4 @@ def refresh():
     new_access_token = create_access_token(identity=current_user)
     return jsonify(access_token=new_access_token), 200
 
-# Add any other authentication routes here
+# Add any other authentication routes as needed
