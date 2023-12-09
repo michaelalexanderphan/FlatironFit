@@ -6,10 +6,9 @@ class Exercise(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    body_part = db.Column(db.String(100), nullable=True)  # Body part targeted by the exercise
-    difficulty = db.Column(db.String(50), nullable=True)  # Difficulty level (e.g., Beginner, Intermediate, Advanced)
-    form_explanation = db.Column(db.Text, nullable=True)  # Textual explanation of the proper form
-    youtube_url = db.Column(db.String(255), nullable=True)  # URL to a YouTube video demonstrating the exercise
+    body_part = db.Column(db.String(100), nullable=True)  
+    difficulty = db.Column(db.String(50), nullable=True)  
+    youtube_url = db.Column(db.String(255), nullable=True) 
     
     def __repr__(self):
         return f'<Exercise {self.name}>'
@@ -22,6 +21,5 @@ class Exercise(db.Model):
             'description': self.description,
             'body_part': self.body_part,
             'difficulty': self.difficulty,
-            'form_explanation': self.form_explanation,
             'youtube_url': self.youtube_url
         }
