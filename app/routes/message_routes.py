@@ -9,7 +9,6 @@ message_bp = Blueprint('message_bp', __name__)
 @jwt_required()
 def get_messages():
     current_user_id = get_jwt_identity()
-    # Retrieve messages where the user is either the sender or the receiver
     messages = Message.query.filter((Message.sender_id == current_user_id) | (Message.receiver_id == current_user_id)).all()
     return jsonify([message.to_dict() for message in messages]), 200
 
@@ -35,9 +34,7 @@ def delete_message(message_id):
     current_user_id = get_jwt_identity()
     message = Message.query.get(message_id)
 
-    if not message:
-        return jsonify({"msg": "Message not found"}), 404
-    if message.sender_id != current_user_id:
+    if not message or message.sender_id != current_user_id:
         return jsonify({"msg": "Unauthorized"}), 403
 
     db.session.delete(message)

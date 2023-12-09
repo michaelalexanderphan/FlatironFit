@@ -1,36 +1,17 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
-from flask_migrate import Migrate
+from app import db
 
-# Initialize extensions
-db = SQLAlchemy()
-jwt = JWTManager()
-migrate = Migrate()
+class Message(db.Model):
+    __tablename__ = 'messages'
 
-def create_app():
-    app = Flask(__name__)
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
 
-    # Configurations
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flatironfit.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Change this to a random secret key
-
-    # Initialize extensions with app instance
-    db.init_app(app)
-    jwt.init_app(app)
-    migrate.init_app(app, db)
-
-    # Import models
-    from app.models import user, workout, exercise, message
-
-    # Import routes
-    from app.routes import user_routes, workout_routes, exercise_routes, message_routes
-
-    # Register Blueprints
-    app.register_blueprint(user_routes.user_bp, url_prefix='/api')
-    app.register_blueprint(workout_routes.workout_bp, url_prefix='/api')
-    app.register_blueprint(exercise_routes.exercise_bp, url_prefix='/api')
-    app.register_blueprint(message_routes.message_bp, url_prefix='/api')
-
-    return app
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "sender_id": self.sender_id,
+            "receiver_id": self.receiver_id,
+            "content": self.content
+        }

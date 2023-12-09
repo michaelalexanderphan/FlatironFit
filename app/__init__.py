@@ -26,13 +26,13 @@ def create_app():
 
     # Import routes
     from app.routes import user_routes, workout_routes, exercise_routes, message_routes
-    from app.auth import auth_bp  # Make sure you have this auth_bp from app/auth.py
+    # Import auth routes if you have them
 
     # Register Blueprints
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(user_routes.user_bp, url_prefix='/api/users')
     app.register_blueprint(workout_routes.workout_bp, url_prefix='/api/workouts')
     app.register_blueprint(exercise_routes.exercise_bp, url_prefix='/api/exercises')
     app.register_blueprint(message_routes.message_bp, url_prefix='/api/messages')
+    # Register auth blueprint if you have it
 
     return app
