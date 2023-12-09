@@ -16,7 +16,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Change this to a random secret key
 
-    # Initialize extensions with the app instance
+    # Initialize extensions with app instance
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
@@ -26,13 +26,11 @@ def create_app():
 
     # Import routes
     from app.routes import user_routes, workout_routes, exercise_routes, message_routes
-    from app.auth import auth_bp  # Make sure you have this auth_bp from app/auth.py
 
     # Register Blueprints
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(user_routes.user_bp, url_prefix='/api/users')
-    app.register_blueprint(workout_routes.workout_bp, url_prefix='/api/workouts')
-    app.register_blueprint(exercise_routes.exercise_bp, url_prefix='/api/exercises')
-    app.register_blueprint(message_routes.message_bp, url_prefix='/api/messages')
+    app.register_blueprint(user_routes.user_bp, url_prefix='/api')
+    app.register_blueprint(workout_routes.workout_bp, url_prefix='/api')
+    app.register_blueprint(exercise_routes.exercise_bp, url_prefix='/api')
+    app.register_blueprint(message_routes.message_bp, url_prefix='/api')
 
     return app
