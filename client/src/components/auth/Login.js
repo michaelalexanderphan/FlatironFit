@@ -1,9 +1,9 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios'; 
-import { AuthContext } from '../context/AuthContext'; // Import the AuthContext
+import axios from 'axios';
+import { AuthContext } from '../../context/AuthContext';
 
-function Login({ history }) { 
-  const { login } = useContext(AuthContext); 
+function Login({ history }) {
+  const { login } = useContext(AuthContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,8 +24,8 @@ function Login({ history }) {
       setIsLoading(false);
 
       if (response.data.access_token) {
-        login(response.data.user, response.data.access_token); 
-        history.push('/dashboard'); 
+        login(response.data.user, response.data.access_token);
+        history.push('/dashboard');
       } else {
         setError('Invalid credentials');
       }
@@ -35,11 +35,37 @@ function Login({ history }) {
     }
   };
 
+  const formStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '300px',
+    margin: 'auto',
+  };
+
+  const inputStyle = {
+    marginBottom: '10px',
+    padding: '8px',
+    fontSize: '16px',
+  };
+
+  const buttonStyle = {
+    padding: '10px',
+    background: '#007bff',
+    color: 'white',
+    border: 'none',
+    cursor: isLoading ? 'default' : 'pointer',
+  };
+
+  const errorStyle = {
+    color: 'red',
+    marginBottom: '10px',
+  };
+
   return (
     <div>
       <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        {error && <p className="error">{error}</p>}
+      <form onSubmit={handleLogin} style={formStyle}>
+        {error && <p style={errorStyle}>{error}</p>}
         <div>
           <label htmlFor="username">Username</label>
           <input
@@ -48,6 +74,7 @@ function Login({ history }) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={isLoading}
+            style={inputStyle}
           />
         </div>
         <div>
@@ -58,9 +85,10 @@ function Login({ history }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
+            style={inputStyle}
           />
         </div>
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading} style={buttonStyle}>
           {isLoading ? 'Logging in...' : 'Log In'}
         </button>
       </form>
