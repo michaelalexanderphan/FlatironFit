@@ -1,16 +1,17 @@
-// App.js
 import React from 'react';
-import { AuthProvider } from './context/AuthContext';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './views/Home';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import NotFound from './views/NotFound';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <Toaster />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
