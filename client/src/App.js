@@ -4,6 +4,8 @@ import Home from './views/Home';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import NotFound from './views/NotFound';
+import Header from './components/common/Header';
+import Footer from './components/common/Footer';
 
 function App() {
   return (
