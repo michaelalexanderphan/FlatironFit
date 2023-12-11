@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios'; 
+import { AuthContext } from '../context/AuthContext'; // Import the AuthContext
 
-function Login({ onLoginSuccess }) {
+function Login({ history }) { 
+  const { login } = useContext(AuthContext); 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +24,8 @@ function Login({ onLoginSuccess }) {
       setIsLoading(false);
 
       if (response.data.access_token) {
-        onLoginSuccess(response.data.access_token); 
+        login(response.data.user, response.data.access_token); 
+        history.push('/dashboard'); 
       } else {
         setError('Invalid credentials');
       }
