@@ -18,7 +18,6 @@ s
     
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flatironfit.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # Use the JWT_SECRET_KEY from the environment variable
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'fallback_secret_key')
 
     
