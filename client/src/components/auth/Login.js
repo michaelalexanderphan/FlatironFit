@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-// Import your API helper - this is just a placeholder
-// import { apiLogin } from '../api';
+import axios from 'axios'; // Make sure you have axios installed
 
 function Login({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
@@ -19,14 +18,13 @@ function Login({ onLoginSuccess }) {
     setIsLoading(true);
     try {
       setError('');
-      // Simulated API call
-      const result = await apiLogin(username, password); // Replace with your actual API call
+      const response = await axios.post('/api/auth/login', { username, password });
       setIsLoading(false);
 
-      if (result.success) {
-        onLoginSuccess(result.token); // Pass the token up to the parent component
+      if (response.data.access_token) {
+        onLoginSuccess(response.data.access_token); 
       } else {
-        setError(result.message);
+        setError('Invalid credentials');
       }
     } catch (err) {
       setIsLoading(false);
@@ -65,20 +63,6 @@ function Login({ onLoginSuccess }) {
       </form>
     </div>
   );
-}
-
-// Replace the fake apiLogin function with your actual API call
-async function apiLogin(username, password) {
-  // This is a fake API call, you should replace it with an actual API call
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (username === 'user' && password === 'pass') {
-        resolve({ success: true, token: 'fake-jwt-token' });
-      } else {
-        resolve({ success: false, message: 'Invalid credentials' });
-      }
-    }, 1000);
-  });
 }
 
 export default Login;
