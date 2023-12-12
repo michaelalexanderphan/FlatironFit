@@ -12,6 +12,9 @@ def register():
     email = request.json.get('email', None)
     password = request.json.get('password', None)
     role = request.json.get('role', 'client')
+    profile_image = request.json.get('profile_image', '')  
+    contact_info = request.json.get('contact_info', '')  
+    bio = request.json.get('bio', '')  
 
     if not username or not email or not password:
         return jsonify({"msg": "Missing username, email, or password"}), 400
@@ -20,11 +23,13 @@ def register():
         return jsonify({"msg": "Username or email already exists"}), 409
 
     hashed_password = generate_password_hash(password)
-    new_user = User(username=username, email=email, role=role, password_hash=hashed_password)
+    new_user = User(username=username, email=email, role=role, password_hash=hashed_password,
+                    profile_image=profile_image, contact_info=contact_info, bio=bio)  
     db.session.add(new_user)
     db.session.commit()
 
     return jsonify({"msg": "User registered successfully"}), 201
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():

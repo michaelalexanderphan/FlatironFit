@@ -1,14 +1,25 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext';
-import '../styling/Home.css';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 function Home() {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  // Redirect to dashboard if user is already logged in
+  if (user) {
+    navigate('/dashboard');
+  }
 
   return (
-    <div className="home-container">
+    <div className="container">
       <h1>Welcome to FlatironFit</h1>
-      {user && <p>Hello, {user.name}!</p>}
+      {!user && (
+        <div className="auth-box">
+          <Link to="/login" className="auth-link">Login</Link>
+          <Link to="/signup" className="auth-link">Signup</Link>
+        </div>
+      )}
     </div>
   );
 }
