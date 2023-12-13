@@ -23,7 +23,8 @@ function Login() {
 
     try {
       const response = await axios.post('/api/auth/login', { username, password });
-      if (response.data.access_token) {
+      
+      if (response.data.msg === 'Login successful') {
         login(response.data.user, response.data.access_token); 
         navigate('/dashboard'); 
         toast.success('Logged in successfully!');

@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 
 class Workout(db.Model):
     __tablename__ = 'workouts'
@@ -7,8 +8,9 @@ class Workout(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationship to link users to their workouts
     users = db.relationship('User', backref='workouts', lazy=True)
 
     def __repr__(self):

@@ -1,4 +1,5 @@
 from app import db
+from urllib.parse import urlparse
 
 class Exercise(db.Model):
     __tablename__ = 'exercises'
@@ -10,11 +11,14 @@ class Exercise(db.Model):
     difficulty = db.Column(db.String(50), nullable=True)  
     youtube_url = db.Column(db.String(255), nullable=True) 
     
+    def is_valid_youtube_url(self):
+        parsed_url = urlparse(self.youtube_url)
+        return all([parsed_url.scheme, parsed_url.netloc, "youtube" in parsed_url.netloc])
+
     def __repr__(self):
         return f'<Exercise {self.name}>'
 
     def to_dict(self):
-        """Return a dictionary representation of the exercise."""
         return {
             'id': self.id,
             'name': self.name,

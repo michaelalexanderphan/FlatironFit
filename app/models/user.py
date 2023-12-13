@@ -1,5 +1,6 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
+import re
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -10,13 +11,9 @@ class User(db.Model):
     password_hash = db.Column(db.String(128))
     role = db.Column(db.String(80), nullable=False)  # 'trainer' or 'client'
     
-    # Additional fields
     profile_image = db.Column(db.String(255))  # URL to the profile image
     contact_info = db.Column(db.String(255))  # Contact information
     bio = db.Column(db.Text)  # Short biography or description
-
-    # Relationships with other models (if any)
-    # For example, a relationship with a Workout or Message model
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -24,8 +21,12 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    @staticmethod
+    def validate_email(email):
+        pattern = r'^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+        return re.match(pattern, email, re.IGNORECASE) is not None
+
     def to_dict(self):
-        """Return a dictionary representation of the user."""
         return {
             'id': self.id,
             'username': self.username,

@@ -6,7 +6,6 @@ function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [profileImage, setProfileImage] = useState(null); // Updated to null
   const [contactInfo, setContactInfo] = useState('');
   const [bio, setBio] = useState('');
   const [error, setError] = useState('');
@@ -15,7 +14,6 @@ function Signup() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-
     if (!username || !email || !password) {
       setError('Please fill in all fields');
       return;
@@ -24,24 +22,17 @@ function Signup() {
     setIsLoading(true);
     try {
       setError('');
-
       const formData = new FormData();
       formData.append('username', username);
       formData.append('email', email);
       formData.append('password', password);
-      formData.append('profileImage', profileImage); // Updated to use the selected file
       formData.append('contactInfo', contactInfo);
       formData.append('bio', bio);
 
-      const response = await axios.post('/api/auth/register', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data', // Set content type to multipart/form-data
-        },
-      });
+      const response = await axios.post('/api/auth/register', formData);
       setIsLoading(false);
 
       if (response.status === 201) {
-        // Optionally display a success message or perform other actions here
         navigate('/login');
       } else {
         setError('Signup failed');
@@ -84,17 +75,6 @@ function Signup() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
-        {/* File input for profile image */}
-        <div>
-          <label htmlFor="profileImage">Profile Image</label>
-          <input
-            id="profileImage"
-            type="file"
-            accept="image/*" // Accept image files
-            onChange={(e) => setProfileImage(e.target.files[0])} // Update the profileImage state with the selected file
             disabled={isLoading}
           />
         </div>
