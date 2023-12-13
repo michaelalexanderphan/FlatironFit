@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import Navbar from './Navbar';
+import { Routes, Route, Outlet } from 'react-router-dom';
+import WorkoutPlans from '../components/workout/WorkoutPlans'; // Updated import path
+import Clients from '../components/workout/WorkoutDetail'; // Placeholder for Clients
+import Exercises from '../components/exercise/ExerciseList'; // Placeholder for Exercises
+import Messaging from '../components/message/MessageList'; // Updated import path
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
@@ -18,7 +24,6 @@ function Dashboard() {
         setWorkouts(response.data);
       } catch (error) {
         console.error('Error fetching workouts', error);
-        // Handle error, e.g., redirect to login if the token is invalid
       } finally {
         setIsLoading(false);
       }
@@ -31,7 +36,7 @@ function Dashboard() {
 
   const handleNewWorkout = async (e) => {
     e.preventDefault();
-    if (!newWorkoutTitle) return; // Simple validation
+    if (!newWorkoutTitle) return;
 
     try {
       const response = await axios.post(
@@ -45,45 +50,21 @@ function Dashboard() {
       }
     } catch (error) {
       console.error('Error creating a new workout', error);
-      // Handle error, e.g., show a notification
     }
   };
 
   return (
     <div>
       <h1>Dashboard</h1>
-      <h2>Welcome, {user ? user.username : 'Guest'}!</h2>
-
-      {user && user.role === 'trainer' && (
-        <div>
-          <h3>Create New Workout Plan</h3>
-          <form onSubmit={handleNewWorkout}>
-            <input
-              type="text"
-              value={newWorkoutTitle}
-              onChange={(e) => setNewWorkoutTitle(e.target.value)}
-              placeholder="Enter workout title"
-              required
-            />
-            <button type="submit">Add Workout</button>
-          </form>
-        </div>
-      )}
-
-      <div>
-        <h3>Your Workout Plans</h3>
-        {isLoading ? (
-          <p>Loading workouts...</p>
-        ) : workouts.length ? (
-          <ul>
-            {workouts.map(workout => (
-              <li key={workout.id}>{workout.title}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No workouts found. Start by creating a new plan.</p>
-        )}
-      </div>
+      <h2>Welcome, {user ? `Welcome, ${user.username}!` : 'Guest'}!</h2>
+      <Navbar />
+      <Routes>
+        <Route path="workout-plans" element={<WorkoutPlans />} />
+        <Route path="exercises" element={<Exercises />} />
+        <Route path="clients" element={<Clients />} />
+        <Route path="messaging" element={<Messaging />} />
+        <Route index element={<Outlet />} />
+      </Routes>
     </div>
   );
 }
