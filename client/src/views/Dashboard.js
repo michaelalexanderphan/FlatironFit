@@ -14,54 +14,50 @@ function Dashboard() {
   const [workouts, setWorkouts] = useState([]);
   const [newWorkoutTitle, setNewWorkoutTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchWorkouts = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get('/api/workouts/workouts', {  // Adjusted URL
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('authToken')}` },
-        });
-        setWorkouts(response.data);
-      } catch (error) {
-        console.error('Error fetching workouts', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  
-    console.log('User:', user); // Log the user object
-  
-    if (user) {
-      fetchWorkouts();
-    }
-  }, [user]);
-  
-  const handleNewWorkout = async (e) => {
-    e.preventDefault();
-    if (!newWorkoutTitle) return;
-
-    try {
-      const response = await axios.post(
-        '/api/workouts',
-        { title: newWorkoutTitle },
-        { headers: { Authorization: `Bearer ${sessionStorage.getItem('authToken')}` } }
-      );
-      if (response.status === 201) {
-        setWorkouts([...workouts, response.data]);
-        setNewWorkoutTitle('');
-      }
-    } catch (error) {
-      console.error('Error creating a new workout', error);
-    }
-  };
-
   const authToken = sessionStorage.getItem('authToken');
 
-  if (!authToken) {
-    navigate('/login');
-  }
+  useEffect(() => {
+    if (!authToken) {
+      navigate('/login');
+    }
+  }, [authToken, navigate]);
+
+  useEffect(() => {
+    if (user && authToken) {
+      setIsLoading(true);
+      setError('');
+      axios.get('/api/workouts/workouts', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }).then(response => {
+        setWorkouts(response.data);
+      }).catch(error => {
+        setError('Failed to fetch workouts');
+        console.error('Error fetching workouts', error);
+      }).finally(() => {
+        setIsLoading(false);
+      });
+    }
+  }, [user, authToken]);
+
+  const handleNewWorkout = async (e) => {
+    e.preventDefault();
+    if (newWorkoutTitle) {
+      axios.post(
+        '/api/workouts',
+        { title: newWorkoutTitle },
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      ).then(response => {
+        if (response.status === 201) {
+          setWorkouts([...workouts, response.data]);
+          setNewWorkoutTitle('');
+        }
+      }).catch(error => {
+        console.error('Error creating a new workout', error);
+      });
+    }
+  };
 
   return (
     <div>
@@ -73,8 +69,6 @@ function Dashboard() {
       </div>
       <Routes>
         <Route path="workout-plans" element={<WorkoutPlans />} />
-        {/* <Route path="exercises" element={<Exercises />} />
-        <Route path="clients" element={<Clients />} /> */}
         <Route
           path="messaging"
           element={
@@ -86,6 +80,7 @@ function Dashboard() {
         />
         <Route index element={<Outlet />} />
       </Routes>
+      {error && <p>Error: {error}</p>}
     </div>
   );
 }
