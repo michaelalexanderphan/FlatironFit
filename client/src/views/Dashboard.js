@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext'; 
 import axios from 'axios';
 import { Link, Routes, Route, Outlet, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-import WorkoutPlans from '../components/workout/WorkoutPlans';
-import Clients from '../components/workout/WorkoutDetail';
-import Exercises from '../components/exercise/ExerciseList';
-import Messaging from '../components/message/MessageList';
-import MessageForm from '../components/message/MessageForm';
+import WorkoutPlans from '../components/workout/WorkoutPlans'; // Assuming components is within src/components
+import Clients from '../components/workout/WorkoutDetail'; 
+import Exercises from '../components/exercise/ExerciseList'; 
+import Messaging from '../components/message/MessageList'; 
+import MessageForm from '../components/message/MessageForm'; 
+
+
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
@@ -59,7 +61,6 @@ function Dashboard() {
 
   if (!authToken) {
     navigate('/login');
-    return null;
   }
 
   return (
@@ -68,7 +69,7 @@ function Dashboard() {
       <h2>Welcome, {user ? user.username : 'Guest'}!</h2>
       <Navbar />
       <div>
-        <Link to="/logout">Logout</Link>
+        <Link to="/dashboard/logout">Logout</Link>
       </div>
       <Routes>
         <Route path="workout-plans" element={<WorkoutPlans />} />
