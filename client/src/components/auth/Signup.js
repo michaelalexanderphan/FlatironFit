@@ -6,14 +6,14 @@ function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [contactInfo, setContactInfo] = useState('');
+  const [bio, setBio] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
-
     if (!username || !email || !password) {
       setError('Please fill in all fields');
       return;
@@ -22,7 +22,14 @@ function Signup() {
     setIsLoading(true);
     try {
       setError('');
-      const response = await axios.post('/api/auth/register', { username, email, password });
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('contactInfo', contactInfo);
+      formData.append('bio', bio);
+
+      const response = await axios.post('/api/auth/register', formData);
       setIsLoading(false);
 
       if (response.status === 201) {
@@ -32,7 +39,7 @@ function Signup() {
       }
     } catch (err) {
       setIsLoading(false);
-      setError('Signup failed. Please try again later.');
+      setError(err.response && err.response.data.msg ? err.response.data.msg : 'Signup failed. Please try again later.');
     }
   };
 
@@ -68,6 +75,25 @@ function Signup() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+        <div>
+          <label htmlFor="contactInfo">Contact Information</label>
+          <input
+            id="contactInfo"
+            type="text"
+            value={contactInfo}
+            onChange={(e) => setContactInfo(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+        <div>
+          <label htmlFor="bio">Bio</label>
+          <textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
             disabled={isLoading}
           />
         </div>

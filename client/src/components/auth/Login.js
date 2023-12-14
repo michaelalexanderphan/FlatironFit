@@ -1,37 +1,40 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios'; 
-import { AuthContext } from '../context/AuthContext'; // Import the AuthContext
+import axios from 'axios';
+import { AuthContext } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
-function Login({ history }) { 
-  const { login } = useContext(AuthContext); 
+function Login() {
+  const { login } = useContext(AuthContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!username || !password) {
-      setError('Please enter both username and password');
+      toast.error('Please enter both username and password');
+      setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
     try {
-      setError('');
       const response = await axios.post('/api/auth/login', { username, password });
-      setIsLoading(false);
-
-      if (response.data.access_token) {
+      
+      if (response.data.msg === 'Login successful') {
         login(response.data.user, response.data.access_token); 
-        history.push('/dashboard'); 
+        navigate('/dashboard'); 
+        toast.success('Logged in successfully!');
       } else {
-        setError('Invalid credentials');
+        toast.error('Invalid credentials');
       }
     } catch (err) {
+      toast.error('Login failed. Please try again later.');
+    } finally {
       setIsLoading(false);
-      setError('Login failed. Please try again later.');
     }
   };
 
@@ -39,7 +42,6 @@ function Login({ history }) {
     <div>
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-        {error && <p className="error">{error}</p>}
         <div>
           <label htmlFor="username">Username</label>
           <input
