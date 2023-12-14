@@ -9,12 +9,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData, token) => {
     setUser(userData);
-    sessionStorage.setItem('authToken', token); // Storing the token in sessionStorage
+    sessionStorage.setItem('authToken', token);
+    console.log('User logged in:', userData); // Add this line
   };
 
   const logout = () => {
     setUser(null);
-    sessionStorage.removeItem('authToken'); // Clearing the token on logout
+    sessionStorage.removeItem('authToken');
+    console.log('User logged out'); // Add this line
   };
 
   return (
