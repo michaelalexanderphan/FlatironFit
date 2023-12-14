@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { Link } from 'react-router-dom'; // Import the Link component
 import Navbar from './Navbar';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import WorkoutPlans from '../components/workout/WorkoutPlans'; // Updated import path
@@ -58,6 +59,9 @@ function Dashboard() {
       <h1>Dashboard</h1>
       <h2>Welcome, {user ? `Welcome, ${user.username}!` : 'Guest'}!</h2>
       <Navbar />
+      <div>
+        <Link to="/logout">Logout</Link>
+      </div>
       <Routes>
         <Route path="workout-plans" element={<WorkoutPlans />} />
         <Route path="exercises" element={<Exercises />} />
