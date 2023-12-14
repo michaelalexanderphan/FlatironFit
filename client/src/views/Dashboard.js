@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; // Import the Link component
+import { Link, Routes, Route, Outlet, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-import { Routes, Route, Outlet } from 'react-router-dom';
-import WorkoutPlans from '../components/workout/WorkoutPlans'; // Updated import path
-import Clients from '../components/workout/WorkoutDetail'; // Placeholder for Clients
-import Exercises from '../components/exercise/ExerciseList'; // Placeholder for Exercises
-import Messaging from '../components/message/MessageList'; // Updated import path
+import WorkoutPlans from '../components/workout/WorkoutPlans';
+import Clients from '../components/workout/WorkoutDetail';
+import Exercises from '../components/exercise/ExerciseList';
+import Messaging from '../components/message/MessageList';
+import MessageForm from '../components/message/MessageForm';
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
   const [workouts, setWorkouts] = useState([]);
   const [newWorkoutTitle, setNewWorkoutTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -54,10 +55,17 @@ function Dashboard() {
     }
   };
 
+  const authToken = sessionStorage.getItem('authToken');
+
+  if (!authToken) {
+    navigate('/login');
+    return null;
+  }
+
   return (
     <div>
       <h1>Dashboard</h1>
-      <h2>Welcome, {user ? `Welcome, ${user.username}!` : 'Guest'}!</h2>
+      <h2>Welcome, {user ? user.username : 'Guest'}!</h2>
       <Navbar />
       <div>
         <Link to="/logout">Logout</Link>
@@ -66,7 +74,12 @@ function Dashboard() {
         <Route path="workout-plans" element={<WorkoutPlans />} />
         <Route path="exercises" element={<Exercises />} />
         <Route path="clients" element={<Clients />} />
-        <Route path="messaging" element={<Messaging />} />
+        <Route path="messaging" element={
+          <>
+            <MessageForm currentUserId={user?.id} authToken={authToken} role={user?.role} />
+            <Messaging currentUserId={user?.id} authToken={authToken} />
+          </>
+        } />
         <Route index element={<Outlet />} />
       </Routes>
     </div>
