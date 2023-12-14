@@ -7,10 +7,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.user import User
 from app import db
 from datetime import timedelta
-from flask_cors import CORS  # Import CORS from flask_cors
+from flask_cors import CORS  
 
 auth_bp = Blueprint('auth_bp', __name__)
-CORS(auth_bp)  # Add this line to enable CORS for the auth_bp blueprint
+CORS(auth_bp)  
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -18,7 +18,7 @@ def register():
     email = request.form.get('email')
     password = request.form.get('password')
     role = request.form.get('role', 'client')
-    secret_code = request.form.get('secret_code', 'trainer')  # Additional field for secret code
+    secret_code = request.form.get('secret_code', 'trainer')  
     contact_info = request.form.get('contactInfo', '')
     bio = request.form.get('bio', '')
 
@@ -28,7 +28,7 @@ def register():
     if User.query.filter((User.username == username) | (User.email == email)).first():
         return jsonify({"msg": "Username or email already exists"}), 409
 
-    # Check if role is 'trainer' and verify the secret code
+    
     if role == 'trainer' and secret_code != 'trainer':
         return jsonify({"msg": "Invalid secret code for trainer role"}), 400
 
@@ -70,7 +70,7 @@ def login():
         response = make_response(jsonify({"msg": "Login successful"}), 200)
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
-        response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
+        response.headers.add("Access-Control-Allow-Origin", "*")  
 
         return response
 
@@ -81,7 +81,7 @@ def login():
 def logout():
     response = make_response(jsonify({"msg": "Logout successful"}), 200)
     unset_jwt_cookies(response)
-    response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
+    response.headers.add("Access-Control-Allow-Origin", "*")  
     return response
 
 @auth_bp.route('/token/refresh', methods=['POST'])
@@ -92,6 +92,6 @@ def refresh():
 
     response = make_response(jsonify({"msg": "Token refreshed"}), 200)
     set_access_cookies(response, new_access_token)
-    response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
+    response.headers.add("Access-Control-Allow-Origin", "*")  
 
     return response

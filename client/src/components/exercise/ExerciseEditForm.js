@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
 
-function ExerciseForm({ exerciseId, onExerciseSaved }) {
+function ExerciseEditForm() {
   const [exercise, setExercise] = useState({
     name: '',
     description: '',
@@ -10,17 +11,17 @@ function ExerciseForm({ exerciseId, onExerciseSaved }) {
     youtube_url: ''
   });
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { exerciseId } = useParams(); // Assuming you're using react-router-dom
 
   useEffect(() => {
-    if (exerciseId) {
-      axios.get(`/api/exercises/${exerciseId}`)
-        .then(response => {
-          setExercise(response.data);
-        })
-        .catch(error => {
-          console.error('Error fetching exercise details', error);
-        });
-    }
+    axios.get(`/api/exercises/${exerciseId}`)
+      .then(response => {
+        setExercise(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching exercise details', error);
+      });
   }, [exerciseId]);
 
   const handleChange = (e) => {
@@ -32,39 +33,25 @@ function ExerciseForm({ exerciseId, onExerciseSaved }) {
     return regExp.test(url);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (exercise.youtube_url && !validateYouTubeUrl(exercise.youtube_url)) {
       setError('Please enter a valid YouTube URL.');
       return;
     }
 
-    try {
-      let response;
-      if (exerciseId) {
-        response = await axios.put(`/api/exercises/${exerciseId}`, exercise);
-      } else {
-        response = await axios.post('/api/exercises', exercise);
-      }
-
-      if (response.status === 200 || response.status === 201) {
-        onExerciseSaved(response.data);
-        setExercise({
-          name: '',
-          description: '',
-          body_part: '',
-          difficulty: '',
-          youtube_url: ''
-        });
-      }
-    } catch (error) {
-      setError('Error saving exercise. Please try again.');
-    }
+    axios.put(`/api/exercises/${exerciseId}`, exercise)
+      .then(response => {
+        navigate('/dashboard/exercises'); 
+      })
+      .catch(error => {
+        setError('Error updating exercise. Please try again.');
+      });
   };
 
   return (
     <div>
-      <h2>{exerciseId ? 'Edit Exercise' : 'Create Exercise'}</h2>
+      <h2>Edit Exercise</h2>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <input
@@ -98,10 +85,10 @@ function ExerciseForm({ exerciseId, onExerciseSaved }) {
           onChange={handleChange}
           placeholder="YouTube URL"
         />
-        <button type="submit">{exerciseId ? 'Save Changes' : 'Create Exercise'}</button>
+        <button type="submit">Save Changes</button>
       </form>
     </div>
   );
 }
 
-export default ExerciseForm;
+export default ExerciseEditForm;
