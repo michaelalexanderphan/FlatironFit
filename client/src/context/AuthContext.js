@@ -8,10 +8,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    console.log('useEffect triggered in AuthProvider');
     const storedUser = sessionStorage.getItem('user');
+    console.log('Stored user:', storedUser);
     if (storedUser) {
       try {
         const userData = JSON.parse(storedUser);
+        console.log('Parsed user data:', userData);
         setUser(userData);
       } catch (e) {
         console.error('Failed to parse user data:', e);
@@ -20,6 +23,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, token) => {
+    console.log('login function called with:', userData, token);
     setUser(userData);
     sessionStorage.setItem('user', JSON.stringify(userData));
     sessionStorage.setItem('authToken', token);

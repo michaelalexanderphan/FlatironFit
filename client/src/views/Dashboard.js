@@ -20,7 +20,7 @@ function Dashboard() {
     const fetchWorkouts = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get('/api/workouts', {
+        const response = await axios.get('/api/workouts/workouts', {  // Adjusted URL
           headers: { Authorization: `Bearer ${sessionStorage.getItem('authToken')}` },
         });
         setWorkouts(response.data);
@@ -30,14 +30,14 @@ function Dashboard() {
         setIsLoading(false);
       }
     };
-
+  
     console.log('User:', user); // Log the user object
-
+  
     if (user) {
       fetchWorkouts();
     }
   }, [user]);
-
+  
   const handleNewWorkout = async (e) => {
     e.preventDefault();
     if (!newWorkoutTitle) return;

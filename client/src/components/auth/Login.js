@@ -14,6 +14,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log('Attempting to log in...');
 
     if (!username || !password) {
       toast.error('Please enter both username and password');
@@ -22,9 +23,13 @@ function Login() {
     }
 
     try {
+      console.log('Sending login request...');
       const response = await axios.post('/api/auth/login', { username, password });
-      
+      console.log('Full login response:', response); // Log the entire response
+    
+
       if (response.data.msg === 'Login successful') {
+        console.log('Login successful, calling login function with:', response.data.user);
         login(response.data.user, response.data.access_token); 
         navigate('/dashboard'); 
         toast.success('Logged in successfully!');
@@ -32,6 +37,7 @@ function Login() {
         toast.error('Invalid credentials');
       }
     } catch (err) {
+      console.error('Login error:', err);
       toast.error('Login failed. Please try again later.');
     } finally {
       setIsLoading(false);
