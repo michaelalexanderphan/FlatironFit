@@ -1,7 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 function Navbar() {
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <nav>
       <Link to="/dashboard/profile">Profile</Link>
@@ -10,6 +19,9 @@ function Navbar() {
       <Link to="/dashboard/clients">Clients</Link>
       <Link to="/dashboard/messaging">Messaging</Link>
       <Link to="/dashboard/calendar">Calendar</Link>
+      {user && (
+        <button onClick={handleLogout}>Logout</button>
+      )}
     </nav>
   );
 }

@@ -7,10 +7,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.user import User
 from app import db
 from datetime import timedelta
-from flask_cors import CORS  
+from flask_cors import CORS
 
 auth_bp = Blueprint('auth_bp', __name__)
-CORS(auth_bp)  
+CORS(auth_bp)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -18,7 +18,7 @@ def register():
     email = request.form.get('email')
     password = request.form.get('password')
     role = request.form.get('role', 'client')
-    secret_code = request.form.get('secret_code', 'trainer')  
+    secret_code = request.form.get('secret_code', 'trainer')
     contact_info = request.form.get('contactInfo', '')
     bio = request.form.get('bio', '')
 
@@ -28,7 +28,6 @@ def register():
     if User.query.filter((User.username == username) | (User.email == email)).first():
         return jsonify({"msg": "Username or email already exists"}), 409
 
-    
     if role == 'trainer' and secret_code != 'trainer':
         return jsonify({"msg": "Invalid secret code for trainer role"}), 400
 
@@ -39,39 +38,33 @@ def register():
         contact_info=contact_info, bio=bio
     )
 
-    try:
-        db.session.add(new_user)
-        db.session.commit()
-        response = jsonify({"msg": "User registered successfully"})
-        response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
-        return response, 201
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error adding user to the database: {e}")
-        return jsonify({"msg": "Failed to register user"}), 500
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"msg": "User registered successfully"}), 201
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
 
-    # Print statements for debugging (remove these in production)
-    print(f"Username: {username}")
-    print(f"Password: {password}")
-
     if not username or not password:
         return jsonify({"msg": "Missing username or password"}), 400
 
     user = User.query.filter_by(username=username).first()
     if user and check_password_hash(user.password_hash, password):
-        access_token = create_access_token(identity=username, expires_delta=timedelta(hours=1))
-        refresh_token = create_refresh_token(identity=username, expires_delta=timedelta(days=30))
+        access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=1))
+        refresh_token = create_refresh_token(identity=user.id, expires_delta=timedelta(days=30))
 
-        response = make_response(jsonify({"msg": "Login successful"}), 200)
+        user_data = user.to_dict()  # Convert user data to dict
+
+        response = make_response(jsonify({
+            "msg": "Login successful",
+            "user": user_data,
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }), 200)
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
-        response.headers.add("Access-Control-Allow-Origin", "*")  
-
         return response
 
     return jsonify({"msg": "Bad username or password"}), 401
@@ -81,7 +74,6 @@ def login():
 def logout():
     response = make_response(jsonify({"msg": "Logout successful"}), 200)
     unset_jwt_cookies(response)
-    response.headers.add("Access-Control-Allow-Origin", "*")  
     return response
 
 @auth_bp.route('/token/refresh', methods=['POST'])
@@ -90,8 +82,6 @@ def refresh():
     current_user = get_jwt_identity()
     new_access_token = create_access_token(identity=current_user, expires_delta=timedelta(hours=1))
 
-    response = make_response(jsonify({"msg": "Token refreshed"}), 200)
+    response = make_response(jsonify({"access_token": new_access_token}), 200)
     set_access_cookies(response, new_access_token)
-    response.headers.add("Access-Control-Allow-Origin", "*")  
-
     return response

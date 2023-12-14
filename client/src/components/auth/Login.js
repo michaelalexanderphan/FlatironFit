@@ -21,9 +21,10 @@ function Login() {
       return;
     }
 
-    try {
-      const response = await axios.post('/api/auth/login', { username, password });
-      
+   try {
+  const response = await axios.post('/api/auth/login', { username, password });
+
+
       if (response.data.msg === 'Login successful') {
         login(response.data.user, response.data.access_token); 
         navigate('/dashboard'); 
@@ -32,6 +33,7 @@ function Login() {
         toast.error('Invalid credentials');
       }
     } catch (err) {
+      console.error('Login error:', err);
       toast.error('Login failed. Please try again later.');
     } finally {
       setIsLoading(false);

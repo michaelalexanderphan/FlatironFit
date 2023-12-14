@@ -1,8 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
 export const AuthContext = createContext(null);
-
-export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -10,12 +8,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = sessionStorage.getItem('user');
     if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-      } catch (e) {
-        console.error('Failed to parse user data:', e);
-      }
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
     }
   }, []);
 
@@ -31,9 +25,5 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem('authToken');
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
 };
