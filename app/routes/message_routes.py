@@ -16,11 +16,21 @@ def get_messages():
 @jwt_required()
 def send_message():
     current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)  
     receiver_id = request.json.get('receiver_id')
     content = request.json.get('content')
 
     if not receiver_id or not content:
         return jsonify({"msg": "Receiver and content are required"}), 400
+
+   
+    receiver = User.query.get(receiver_id)
+    if not receiver:
+        return jsonify({"msg": "Receiver not found"}), 404
+
+    
+    if current_user.role == 'client' and receiver.role != 'trainer':
+        return jsonify({"msg": "Clients can only send messages to trainers"}), 403
 
     new_message = Message(sender_id=current_user_id, receiver_id=receiver_id, content=content)
     db.session.add(new_message)
