@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.message import Message
+from app.models.user import User  # Don't forget to import User
 from app import db
 
 message_bp = Blueprint('message_bp', __name__)
@@ -22,13 +23,11 @@ def send_message():
 
     if not receiver_id or not content:
         return jsonify({"msg": "Receiver and content are required"}), 400
-
    
     receiver = User.query.get(receiver_id)
     if not receiver:
         return jsonify({"msg": "Receiver not found"}), 404
 
-    
     if current_user.role == 'client' and receiver.role != 'trainer':
         return jsonify({"msg": "Clients can only send messages to trainers"}), 403
 
