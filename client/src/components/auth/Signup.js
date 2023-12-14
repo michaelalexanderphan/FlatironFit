@@ -8,14 +8,16 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [contactInfo, setContactInfo] = useState('');
   const [bio, setBio] = useState('');
+  const [role, setRole] = useState('client');
+  const [secretCode, setSecretCode] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    if (!username || !email || !password) {
-      setError('Please fill in all fields');
+    if (!username || !email || !password || (role === 'trainer' && secretCode !== 'trainer')) {
+      setError('Please fill in all fields correctly');
       return;
     }
 
@@ -28,6 +30,10 @@ function Signup() {
       formData.append('password', password);
       formData.append('contactInfo', contactInfo);
       formData.append('bio', bio);
+      formData.append('role', role);
+      if (role === 'trainer') {
+        formData.append('secret_code', secretCode);
+      }
 
       const response = await axios.post('/api/auth/register', formData);
       setIsLoading(false);
@@ -97,6 +103,31 @@ function Signup() {
             disabled={isLoading}
           />
         </div>
+        <div>
+          <label htmlFor="role">Role</label>
+          <select
+            id="role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            disabled={isLoading}
+          >
+            <option value="client">Client</option>
+            <option value="trainer">Trainer</option>
+          </select>
+        </div>
+        {role === 'trainer' && (
+          <div>
+            <label htmlFor="secretCode">Secret Code for Trainer</label>
+            <input
+              id="secretCode"
+              type="text"
+              value={secretCode}
+              onChange={(e) => setSecretCode(e.target.value)}
+              disabled={isLoading}
+              placeholder="Enter secret code"
+            />
+          </div>
+        )}
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Signing up...' : 'Sign Up'}
         </button>
