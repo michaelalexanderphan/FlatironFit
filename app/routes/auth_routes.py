@@ -16,7 +16,8 @@ def register():
     email = request.form.get('email')
     password = request.form.get('password')
     role = request.form.get('role', 'client')
-    contact_info = request.form.get('contact_info', '')
+    secret_code = request.form.get('secret_code', 'trainer')  # Additional field for secret code
+    contact_info = request.form.get('contactInfo', '')
     bio = request.form.get('bio', '')
 
     if not username or not email or not password:
@@ -25,16 +26,25 @@ def register():
     if User.query.filter((User.username == username) | (User.email == email)).first():
         return jsonify({"msg": "Username or email already exists"}), 409
 
+    # Check if role is 'trainer' and verify the secret code
+    if role == 'trainer' and secret_code != 'trainer':
+        return jsonify({"msg": "Invalid secret code for trainer role"}), 400
+
     hashed_password = generate_password_hash(password)
     new_user = User(
         username=username, email=email, role=role,
         password_hash=hashed_password,
         contact_info=contact_info, bio=bio
     )
-    db.session.add(new_user)
-    db.session.commit()
 
-    return jsonify({"msg": "User registered successfully"}), 201
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"msg": "User registered successfully"}), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding user to the database: {e}")
+        return jsonify({"msg": "Failed to register user"}), 500
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
