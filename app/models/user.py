@@ -32,7 +32,6 @@ class User(db.Model):
             'username': self.username,
             'email': self.email,
             'role': self.role,
-            # 'profile_image': self.profile_image,
             'contact_info': self.contact_info,
             'bio': self.bio
         }

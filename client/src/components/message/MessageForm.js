@@ -10,7 +10,7 @@ function MessageForm({ currentUserId, authToken, role }) {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/users/available', {
+        const response = await axios.get('/users/available', {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         setUsers(response.data);
@@ -25,7 +25,7 @@ function MessageForm({ currentUserId, authToken, role }) {
   const sendMessage = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/messages', {
+      const response = await axios.post('/messages', {
         receiver_id: receiverId,
         content: content,
       }, {

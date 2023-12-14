@@ -7,8 +7,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.user import User
 from app import db
 from datetime import timedelta
+from flask_cors import CORS  # Import CORS from flask_cors
 
 auth_bp = Blueprint('auth_bp', __name__)
+CORS(auth_bp)  # Add this line to enable CORS for the auth_bp blueprint
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -40,7 +42,9 @@ def register():
     try:
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({"msg": "User registered successfully"}), 201
+        response = jsonify({"msg": "User registered successfully"})
+        response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
+        return response, 201
     except Exception as e:
         db.session.rollback()
         print(f"Error adding user to the database: {e}")
@@ -66,6 +70,7 @@ def login():
         response = make_response(jsonify({"msg": "Login successful"}), 200)
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
+        response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
 
         return response
 
@@ -76,6 +81,7 @@ def login():
 def logout():
     response = make_response(jsonify({"msg": "Logout successful"}), 200)
     unset_jwt_cookies(response)
+    response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
     return response
 
 @auth_bp.route('/token/refresh', methods=['POST'])
@@ -86,5 +92,6 @@ def refresh():
 
     response = make_response(jsonify({"msg": "Token refreshed"}), 200)
     set_access_cookies(response, new_access_token)
+    response.headers.add("Access-Control-Allow-Origin", "*")  # Add CORS header
 
     return response

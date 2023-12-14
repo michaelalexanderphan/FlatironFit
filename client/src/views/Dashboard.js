@@ -21,7 +21,7 @@ function Dashboard() {
       setIsLoading(true);
       try {
         const response = await axios.get('/api/workouts', {
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('authToken')}` }
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('authToken')}` },
         });
         setWorkouts(response.data);
       } catch (error) {
@@ -30,6 +30,8 @@ function Dashboard() {
         setIsLoading(false);
       }
     };
+
+    console.log('User:', user); // Log the user object
 
     if (user) {
       fetchWorkouts();
@@ -59,7 +61,6 @@ function Dashboard() {
 
   if (!authToken) {
     navigate('/login');
-    return null;
   }
 
   return (
@@ -68,18 +69,21 @@ function Dashboard() {
       <h2>Welcome, {user ? user.username : 'Guest'}!</h2>
       <Navbar />
       <div>
-        <Link to="/logout">Logout</Link>
+        <Link to="/dashboard/logout">Logout</Link>
       </div>
       <Routes>
         <Route path="workout-plans" element={<WorkoutPlans />} />
-        <Route path="exercises" element={<Exercises />} />
-        <Route path="clients" element={<Clients />} />
-        <Route path="messaging" element={
-          <>
-            <MessageForm currentUserId={user?.id} authToken={authToken} role={user?.role} />
-            <Messaging currentUserId={user?.id} authToken={authToken} />
-          </>
-        } />
+        {/* <Route path="exercises" element={<Exercises />} />
+        <Route path="clients" element={<Clients />} /> */}
+        <Route
+          path="messaging"
+          element={
+            <>
+              <MessageForm currentUserId={user?.id} authToken={authToken} role={user?.role} />
+              <Messaging currentUserId={user?.id} authToken={authToken} />
+            </>
+          }
+        />
         <Route index element={<Outlet />} />
       </Routes>
     </div>

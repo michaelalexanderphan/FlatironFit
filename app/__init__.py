@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS  # Import CORS
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -23,6 +24,9 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
+
+    # Enable CORS for all routes (customize this in production)
+    CORS(app)  # Allow all origins, you can specify allowed origins as needed
 
     # Import models
     from app.models.user import User
