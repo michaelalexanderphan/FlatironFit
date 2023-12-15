@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../../axiosConfig.js';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -11,28 +11,23 @@ function UserProfile() {
 
   useEffect(() => {
     setIsLoading(true);
-    console.log('Effect running: currentUser', currentUser);
     const fetchUser = async () => {
+      if (!currentUser || !currentUser.id) {
+        navigate('/login');
+        return;
+      }
+      
       try {
-        console.log('Attempting to fetch user');
-        const response = await axios.get(`/api/users/${currentUser.id}`, {
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('authToken')}` }
-        });
-        console.log('User data fetched', response.data);
+        const response = await api.get(`/users/${currentUser.id}`);
         setUser(response.data);
       } catch (error) {
-        console.error('Error fetching user profile', error);
+        setIsLoading(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (currentUser && currentUser.id) {
-      fetchUser();
-    } else {
-      console.log('Redirecting to login because currentUser is invalid');
-      navigate('/login');
-    }
+    fetchUser();
   }, [currentUser, navigate]);
 
   const handleEditProfile = () => {
@@ -40,16 +35,13 @@ function UserProfile() {
   };
 
   if (isLoading) {
-    console.log('Loading the user profile...');
     return <div>Loading profile...</div>;
   }
 
   if (!user) {
-    console.log('User not found after loading');
     return <div>User profile not found.</div>;
   }
 
-  console.log('Rendering user profile with data:', user);
   return (
     <div>
       <h2>User Profile</h2>
