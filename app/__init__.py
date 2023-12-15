@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
@@ -39,7 +39,7 @@ def create_app():
     app.register_blueprint(message_bp, url_prefix='/api/messages')
     app.register_blueprint(user_bp, url_prefix='/api/users')
     
-    CORS(app, supports_credentials=True, origins='http://localhost:3000')
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}) 
 
     @app.before_request
     def before_request_logging():
@@ -50,5 +50,10 @@ def create_app():
     def after_request_logging(response):
         app.logger.debug("Response Headers: %s", response.headers)
         return response
+    # Add this test route to your Flask app near the top, just to test CORS and routing.
+    @app.route('/test', methods=['GET', 'OPTIONS'])
+    def test_route():
+        return jsonify({"message": "Test successful"})
+
 
     return app

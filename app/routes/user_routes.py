@@ -1,16 +1,15 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app import db
+from app.models.user import User
 
 user_bp = Blueprint('user_bp', __name__)
 
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user(user_id):
-    from app.models.user import User
-    print(f"Attempting to fetch user with ID: {user_id}")  # Console log
     current_user_id = get_jwt_identity()
     user = User.query.get_or_404(user_id)
-    # Rest of your code...
     if user.id != current_user_id:
         return jsonify({"msg": "Unauthorized"}), 403
     user_data = {
@@ -21,17 +20,39 @@ def get_user(user_id):
     }
     return jsonify(user_data), 200
 
-
-@user_bp.route('/users/<int:user_id>', methods=['PUT'])
+@user_bp.route('/users/<int:user_id>', methods=['PATCH'])
 @jwt_required()
 def update_user(user_id):
     current_user_id = get_jwt_identity()
     user = User.query.get_or_404(user_id)
     if user.id != current_user_id:
         return jsonify({"msg": "Unauthorized"}), 403
-    data = request.json
+    data = request.get_json()
     user.username = data.get('username', user.username)
     user.email = data.get('email', user.email)
+    user.contact_info = data.get('contact_info', user.contact_info)
+    user.bio = data.get('bio', user.bio)
+    db.session.commit()
+    return jsonify({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "contact_info": user.contact_info,
+        "bio": user.bio
+    }), 200
+
+@user_bp.route('/users/<int:user_id>', methods=['PUT'])
+@jwt_required()
+def replace_user(user_id):
+    current_user_id = get_jwt_identity()
+    user = User.query.get_or_404(user_id)
+    if user.id != current_user_id:
+        return jsonify({"msg": "Unauthorized"}), 403
+    data = request.get_json()
+    user.username = data['username']
+    user.email = data['email']
+    user.contact_info = data['contact_info']
+    user.bio = data['bio']
     if 'password' in data:
         user.set_password(data['password'])
     db.session.commit()
