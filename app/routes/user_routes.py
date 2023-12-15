@@ -1,18 +1,26 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models.user import User
-from app import db
 
 user_bp = Blueprint('user_bp', __name__)
 
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user(user_id):
+    from app.models.user import User
+    print(f"Attempting to fetch user with ID: {user_id}")  # Console log
     current_user_id = get_jwt_identity()
     user = User.query.get_or_404(user_id)
+    # Rest of your code...
     if user.id != current_user_id:
         return jsonify({"msg": "Unauthorized"}), 403
-    return jsonify(user.to_dict()), 200
+    user_data = {
+        "username": user.username,
+        "email": user.email,
+        "contact_info": user.contact_info,
+        "bio": user.bio
+    }
+    return jsonify(user_data), 200
+
 
 @user_bp.route('/users/<int:user_id>', methods=['PUT'])
 @jwt_required()
