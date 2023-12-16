@@ -1,51 +1,47 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.message import Message
-from app.models.user import User  # Don't forget to import User
+from app.models.user import User
+from app.schemas import MessageSchema
 from app import db
+from marshmallow import ValidationError
 
 message_bp = Blueprint('message_bp', __name__)
+
+message_schema = MessageSchema()
+messages_schema = MessageSchema(many=True)
 
 @message_bp.route('/messages', methods=['GET'])
 @jwt_required()
 def get_messages():
     current_user_id = get_jwt_identity()
     messages = Message.query.filter((Message.sender_id == current_user_id) | (Message.receiver_id == current_user_id)).all()
-    return jsonify([message.to_dict() for message in messages]), 200
+    return jsonify(messages_schema.dump(messages)), 200
 
 @message_bp.route('/messages', methods=['POST'])
 @jwt_required()
 def send_message():
     current_user_id = get_jwt_identity()
-    current_user = User.query.get(current_user_id)  
-    receiver_id = request.json.get('receiver_id')
-    content = request.json.get('content')
-
-    if not receiver_id or not content:
-        return jsonify({"msg": "Receiver and content are required"}), 400
-   
-    receiver = User.query.get(receiver_id)
-    if not receiver:
-        return jsonify({"msg": "Receiver not found"}), 404
-
-    if current_user.role == 'client' and receiver.role != 'trainer':
-        return jsonify({"msg": "Clients can only send messages to trainers"}), 403
-
-    new_message = Message(sender_id=current_user_id, receiver_id=receiver_id, content=content)
+    json_data = request.get_json()
+    if not json_data:
+        return jsonify({'message': 'No input data provided'}), 400
+    try:
+        message_data = message_schema.load(json_data)
+        message_data['sender_id'] = current_user_id
+    except ValidationError as err:
+        return jsonify(err.messages), 422
+    new_message = Message(**message_data)
     db.session.add(new_message)
     db.session.commit()
-
-    return jsonify(new_message.to_dict()), 201
+    return jsonify(message_schema.dump(new_message)), 201
 
 @message_bp.route('/messages/<int:message_id>', methods=['DELETE'])
 @jwt_required()
 def delete_message(message_id):
     current_user_id = get_jwt_identity()
-    message = Message.query.get(message_id)
-
-    if not message or message.sender_id != current_user_id:
-        return jsonify({"msg": "Unauthorized"}), 403
-
+    message = Message.query.get_or_404(message_id)
+    if message.sender_id != current_user_id:
+        return jsonify({'message': 'Unauthorized'}), 403
     db.session.delete(message)
     db.session.commit()
-    return jsonify({"msg": "Message deleted successfully"}), 200
+    return jsonify({'message': 'Message deleted successfully'}), 200

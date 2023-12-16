@@ -1,11 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
-import os
-from dotenv import load_dotenv
 from flask_cors import CORS
-import logging
+import os
+from config import DevelopmentConfig, ProductionConfig, TestingConfig
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -13,11 +12,14 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
-    load_dotenv()
-    app.logger.setLevel(logging.DEBUG)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///flatironfit.db')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'fallback_secret_key')
+    env = os.getenv('FLASK_ENV', 'development')
+    if env == 'production':
+        app.config.from_object(ProductionConfig)
+    elif env == 'testing':
+        app.config.from_object(TestingConfig)
+    else:
+        app.config.from_object(DevelopmentConfig)
+
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
@@ -39,21 +41,6 @@ def create_app():
     app.register_blueprint(message_bp, url_prefix='/api/messages')
     app.register_blueprint(user_bp, url_prefix='/api/users')
     
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}) 
-
-    @app.before_request
-    def before_request_logging():
-        app.logger.debug("Request Headers: %s", request.headers)
-        app.logger.debug("Request Body: %s", request.get_data(as_text=True))
-
-    @app.after_request
-    def after_request_logging(response):
-        app.logger.debug("Response Headers: %s", response.headers)
-        return response
-    # Add this test route to your Flask app near the top, just to test CORS and routing.
-    @app.route('/test', methods=['GET', 'OPTIONS'])
-    def test_route():
-        return jsonify({"message": "Test successful"})
-
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     return app

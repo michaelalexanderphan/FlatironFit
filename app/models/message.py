@@ -10,11 +10,5 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "sender_id": self.sender_id,
-            "receiver_id": self.receiver_id,
-            "content": self.content,
-            "timestamp": self.timestamp.isoformat()
-        }
+    def __repr__(self):
+        return f'<Message {self.id}>'
