@@ -74,7 +74,7 @@ def test_token_refresh(client, init_database):
 
 def test_get_exercise_list(client, init_database):
     token = get_auth_token(client)
-    response = client.get('/api/exercises', headers={'Authorization': f'Bearer {token}'})
+    response = client.get('/api/exercises/exercises', headers={'Authorization': f'Bearer {token}'})
     assert response.status_code == 200
 
 def test_create_exercise(client, init_database):

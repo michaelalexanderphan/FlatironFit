@@ -39,7 +39,7 @@ class Register(Resource):
             user_data = json_data
             user_data['password_hash'] = password_hash
 
-            # Check if the role is 'trainer' and add secret_code from the configuration
+            
             if user_data.get('role') == 'trainer':
                 user_data['secret_code'] = Config.SECRET_CODE
 
