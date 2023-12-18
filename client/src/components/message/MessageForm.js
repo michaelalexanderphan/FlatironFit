@@ -18,7 +18,6 @@ function MessageForm({ currentUserId, authToken, role }) {
         setStatus('Failed to fetch users.');
       }
     };
-
     fetchUsers();
   }, [authToken]);
 
@@ -45,11 +44,7 @@ function MessageForm({ currentUserId, authToken, role }) {
     <div>
       <form onSubmit={sendMessage}>
         {role === 'trainer' && (
-          <select
-            value={receiverId}
-            onChange={(e) => setReceiverId(e.target.value)}
-            required
-          >
+          <select value={receiverId} onChange={(e) => setReceiverId(e.target.value)} required>
             <option value="">Select a user</option>
             {users.map(user => (
               <option key={user.id} value={user.id}>{user.username}</option>
@@ -57,20 +52,9 @@ function MessageForm({ currentUserId, authToken, role }) {
           </select>
         )}
         {role === 'client' && (
-          <input
-            type="text"
-            value={receiverId}
-            onChange={(e) => setReceiverId(e.target.value)}
-            placeholder="Trainer ID"
-            required
-          />
+          <input type="text" value={receiverId} onChange={(e) => setReceiverId(e.target.value)} placeholder="Trainer ID" required />
         )}
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Message Content"
-          required
-        />
+        <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Message Content" required />
         <button type="submit">Send Message</button>
       </form>
       {status && <p>{status}</p>}

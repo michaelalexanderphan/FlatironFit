@@ -21,20 +21,13 @@ function Login() {
       return;
     }
 
-   try {
-  const response = await axios.post('/api/auth/login', { username, password });
-
-
-      if (response.data.msg === 'Login successful') {
-        login(response.data.user, response.data.access_token); 
-        navigate('/dashboard'); 
-        toast.success('Logged in successfully!');
-      } else {
-        toast.error('Invalid credentials');
-      }
+    try {
+      const response = await axios.post('/api/auth/login', { username, password });
+      login(response.data.user, response.data.access_token); 
+      navigate('/dashboard'); 
+      toast.success('Logged in successfully!');
     } catch (err) {
-      console.error('Login error:', err);
-      toast.error('Login failed. Please try again later.');
+      toast.error(err.response?.data?.msg || 'Login failed. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +37,7 @@ function Login() {
     <div>
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-        <div>
+      <div>
           <label htmlFor="username">Username</label>
           <input
             id="username"

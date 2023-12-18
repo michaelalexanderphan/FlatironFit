@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function Exercises() {
+function ExerciseList() {
   const [exercises, setExercises] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -11,7 +11,6 @@ function Exercises() {
   }, []);
 
   const fetchExercises = async () => {
-    setIsLoading(true);
     try {
       const response = await axios.get('/api/exercises');
       setExercises(response.data);
@@ -26,7 +25,7 @@ function Exercises() {
   const deleteExercise = (exerciseId) => {
     axios.delete(`/api/exercises/${exerciseId}`)
       .then(() => {
-        fetchExercises(); 
+        fetchExercises();
       })
       .catch(error => {
         console.error('Error deleting exercise', error);
@@ -56,4 +55,4 @@ function Exercises() {
   );
 }
 
-export default Exercises;
+export default ExerciseList;

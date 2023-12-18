@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { validateYouTubeUrl } from '../utils/validation';
 
 function ExerciseEditForm() {
   const [exercise, setExercise] = useState({
@@ -12,7 +13,7 @@ function ExerciseEditForm() {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { exerciseId } = useParams(); // Assuming you're using react-router-dom
+  const { exerciseId } = useParams();
 
   useEffect(() => {
     axios.get(`/api/exercises/${exerciseId}`)
@@ -28,27 +29,22 @@ function ExerciseEditForm() {
     setExercise({ ...exercise, [e.target.name]: e.target.value });
   };
 
-  const validateYouTubeUrl = (url) => {
-    const regExp = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/;
-    return regExp.test(url);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (exercise.youtube_url && !validateYouTubeUrl(exercise.youtube_url)) {
-      setError('Please enter a valid YouTube URL.');
+    if (!exercise.name || !exercise.difficulty || (exercise.youtube_url && !validateYouTubeUrl(exercise.youtube_url))) {
+      setError('Please fill all required fields and enter a valid YouTube URL.');
       return;
     }
 
     axios.put(`/api/exercises/${exerciseId}`, exercise)
       .then(response => {
-        navigate('/dashboard/exercises'); 
+        navigate('/dashboard/exercises');
       })
       .catch(error => {
         setError('Error updating exercise. Please try again.');
       });
   };
-
+  
   return (
     <div>
       <h2>Edit Exercise</h2>

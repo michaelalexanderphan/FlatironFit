@@ -1,5 +1,4 @@
 from app import db
-from urllib.parse import urlparse
 
 class Exercise(db.Model):
     __tablename__ = 'exercises'
@@ -17,13 +16,3 @@ class Exercise(db.Model):
 
     def __repr__(self):
         return f'<Exercise {self.name}>'
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'body_part': self.body_part,
-            'difficulty': self.difficulty,
-            'youtube_url': self.youtube_url
-        }

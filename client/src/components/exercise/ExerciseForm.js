@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { validateYouTubeUrl } from '../utils/validation';
 
 function ExerciseForm({ exerciseId, onExerciseSaved }) {
   const [exercise, setExercise] = useState({
@@ -27,15 +28,10 @@ function ExerciseForm({ exerciseId, onExerciseSaved }) {
     setExercise({ ...exercise, [e.target.name]: e.target.value });
   };
 
-  const validateYouTubeUrl = (url) => {
-    const regExp = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/;
-    return regExp.test(url);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (exercise.youtube_url && !validateYouTubeUrl(exercise.youtube_url)) {
-      setError('Please enter a valid YouTube URL.');
+    if (!exercise.name || !exercise.difficulty || (exercise.youtube_url && !validateYouTubeUrl(exercise.youtube_url))) {
+      setError('Please fill all required fields and enter a valid YouTube URL.');
       return;
     }
 
@@ -46,22 +42,11 @@ function ExerciseForm({ exerciseId, onExerciseSaved }) {
       } else {
         response = await axios.post('/api/exercises', exercise);
       }
-
-      if (response.status === 200 || response.status === 201) {
-        onExerciseSaved(response.data);
-        setExercise({
-          name: '',
-          description: '',
-          body_part: '',
-          difficulty: '',
-          youtube_url: ''
-        });
-      }
+      onExerciseSaved(response.data);
     } catch (error) {
       setError('Error saving exercise. Please try again.');
     }
   };
-
   return (
     <div>
       <h2>{exerciseId ? 'Edit Exercise' : 'Create Exercise'}</h2>
