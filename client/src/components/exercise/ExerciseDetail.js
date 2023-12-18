@@ -16,7 +16,7 @@ function ExerciseDetail({ exerciseId }) {
   useEffect(() => {
     const fetchExercise = async () => {
       try {
-        const response = await axios.get(`/dashboard/exercises/${exerciseId}`);
+        const response = await axios.get(`/api/exercises/${exerciseId}`);
         setExercise(response.data);
         setEditedExercise(response.data);
       } catch (error) {
@@ -35,7 +35,7 @@ function ExerciseDetail({ exerciseId }) {
 
   const saveEdit = async () => {
     try {
-      const response = await axios.put(`/dashboard/exercises/${exerciseId}`, editedExercise);
+      const response = await axios.put(`/api/exercises/${exerciseId}`, editedExercise);
       setExercise(response.data);
       setIsEditing(false);
     } catch (error) {

@@ -24,11 +24,12 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
 
-    from app.models.user import User
+    # Import the association table for many-to-many relationship between Users and Workouts
+    from app.models.user import User, UserWorkout
     from app.models.workout import Workout
     from app.models.exercise import Exercise
     from app.models.message import Message
-    
+
     from app.routes.auth_routes import auth_bp
     from app.routes.workout_routes import workout_bp
     from app.routes.exercise_routes import exercise_bp

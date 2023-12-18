@@ -8,17 +8,14 @@ function MessageList({ currentUserId, authToken }) {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/messages', {
-          headers: {
-            Authorization: `Bearer ${authToken}` 
-          }
+        const response = await axios.get('/messages', {
+          headers: { Authorization: `Bearer ${authToken}` },
         });
         setMessages(response.data);
       } catch (error) {
         setError(error.response && error.response.data.msg ? error.response.data.msg : 'Failed to fetch messages.');
       }
     };
-
     if (currentUserId) {
       fetchMessages();
     }

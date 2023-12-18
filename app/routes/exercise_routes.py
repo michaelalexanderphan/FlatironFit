@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from app.models.exercise import Exercise
 from app.schemas import ExerciseSchema
 from app import db
@@ -15,6 +15,12 @@ exercises_schema = ExerciseSchema(many=True)
 def get_exercises():
     exercises = Exercise.query.all()
     return jsonify(exercises_schema.dump(exercises)), 200
+
+@exercise_bp.route('/exercises/<int:exercise_id>', methods=['GET'])
+@jwt_required()
+def get_exercise(exercise_id):
+    exercise = Exercise.query.get_or_404(exercise_id)
+    return jsonify(exercise_schema.dump(exercise)), 200
 
 @exercise_bp.route('/exercises', methods=['POST'])
 @jwt_required()

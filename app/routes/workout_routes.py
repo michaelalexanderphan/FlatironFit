@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.workout import Workout
+from app.models.user import User, UserWorkout
 from app.schemas import WorkoutSchema
 from app import db
 from marshmallow import ValidationError
@@ -25,12 +26,14 @@ def create_workout():
     try:
         workout_data = workout_schema.load(json_data)
         workout_data['created_by'] = get_jwt_identity()
+        new_workout = Workout(**workout_data)
+        current_user = User.query.get(get_jwt_identity())
+        current_user.workouts.append(new_workout)
+        db.session.add(new_workout)
+        db.session.commit()
+        return jsonify(workout_schema.dump(new_workout)), 201
     except ValidationError as err:
         return jsonify(err.messages), 422
-    new_workout = Workout(**workout_data)
-    db.session.add(new_workout)
-    db.session.commit()
-    return jsonify(workout_schema.dump(new_workout)), 201
 
 @workout_bp.route('/workouts/<int:workout_id>', methods=['PUT'])
 @jwt_required()
@@ -41,12 +44,12 @@ def update_workout(workout_id):
     json_data = request.get_json()
     try:
         workout_data = workout_schema.load(json_data, partial=True)
+        for key, value in workout_data.items():
+            setattr(workout, key, value)
+        db.session.commit()
+        return jsonify(workout_schema.dump(workout)), 200
     except ValidationError as err:
         return jsonify(err.messages), 422
-    for key, value in workout_data.items():
-        setattr(workout, key, value)
-    db.session.commit()
-    return jsonify(workout_schema.dump(workout)), 200
 
 @workout_bp.route('/workouts/<int:workout_id>', methods=['DELETE'])
 @jwt_required()

@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import api from '../../axiosConfig';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function UserProfileEdit() {
@@ -13,7 +13,6 @@ function UserProfileEdit() {
   });
   const navigate = useNavigate();
 
-  // Populate form with current user data on component mount
   useEffect(() => {
     if (user) {
       setFormData({
@@ -23,7 +22,7 @@ function UserProfileEdit() {
         bio: user.bio || '',
       });
     } else {
-      navigate('/login'); // Redirect to login if there is no user in context
+      navigate('/login');
     }
   }, [user, navigate]);
 
@@ -38,12 +37,11 @@ function UserProfileEdit() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.patch(`/users/${user.id}`, formData);
-      setUser(response.data); // Update user in context with new data
-      navigate('/dashboard/profile/'); // Navigate back to the profile page
+      const response = await axios.patch(`/users/${user.id}`, formData);
+      setUser(response.data);
+      navigate('/dashboard/profile/');
     } catch (error) {
       console.error('Error updating profile:', error);
-      // Here you can set an error message in the state and display it to the user if needed
     }
   };
 
@@ -51,51 +49,10 @@ function UserProfileEdit() {
     <div>
       <h2>Edit Profile</h2>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="contact_info">Contact Info:</label>
-          <input
-            type="text"
-            id="contact_info"
-            name="contact_info"
-            value={formData.contact_info}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="bio">Bio:</label>
-          <textarea
-            id="bio"
-            name="bio"
-            value={formData.bio}
-            onChange={handleChange}
-          />
-        </div>
-
+        <input type="text" id="username" name="username" value={formData.username} onChange={handleChange} required />
+        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+        <input type="text" id="contact_info" name="contact_info" value={formData.contact_info} onChange={handleChange} />
+        <textarea id="bio" name="bio" value={formData.bio} onChange={handleChange} />
         <button type="submit">Save Changes</button>
       </form>
     </div>
