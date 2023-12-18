@@ -1,10 +1,10 @@
-from marshmallow import Schema, fields, validate, pre_load, validates, ValidationError
+from marshmallow import Schema, fields, validate, pre_load, validates, ValidationError, validates_schema
 from werkzeug.security import generate_password_hash
 from urllib.parse import urlparse
 import re
 
 class ExerciseSchema(Schema):
-    id = fields.Int()
+    id = fields.Int(dump_only=True)
     name = fields.Str(required=True, validate=validate.Length(max=100))
     description = fields.Str(validate=validate.Length(max=2000))
     body_part = fields.Str(validate=validate.Length(max=100))
@@ -19,28 +19,27 @@ class ExerciseSchema(Schema):
                 raise ValidationError('Invalid YouTube URL')
 
 class MessageSchema(Schema):
-    id = fields.Int()
+    id = fields.Int(dump_only=True)
     sender_id = fields.Int(required=True)
     receiver_id = fields.Int(required=True)
-    content = fields.Str(required=True)
-    timestamp = fields.DateTime()
+    content = fields.Str(required=True, validate=validate.Length(min=1))
+    timestamp = fields.DateTime(dump_only=True)
 
 class UserSchema(Schema):
-    id = fields.Int()
-    username = fields.Str(required=True, validate=validate.Length(max=80))
+    id = fields.Int(dump_only=True)
+    username = fields.Str(required=True, validate=validate.Length(min=3, max=80))
     email = fields.Email(required=True)
-    password = fields.Str(required=True, validate=validate.Length(min=6))
+    password = fields.Str(load_only=True, required=True, validate=validate.Length(min=6))
     role = fields.Str(required=True, validate=validate.OneOf(["trainer", "client"]))
     contact_info = fields.Str()
     bio = fields.Str()
     password_hash = fields.Str(dump_only=True)
-    secret_code = fields.Str() 
+    secret_code = fields.Str(load_only=True)
 
-    @pre_load
-    def process_input(self, data, **kwargs):
-        if 'password' in data:
-            data['password_hash'] = generate_password_hash(data.pop('password'))
-        return data
+    @validates('username')
+    def validate_username(self, value):
+        if not re.match(r'^\w+$', value):
+            raise ValidationError('Username must contain only alphanumeric characters and underscores.')
 
     @validates('email')
     def validate_email(self, value):
@@ -48,12 +47,17 @@ class UserSchema(Schema):
         if not re.match(pattern, value, re.IGNORECASE):
             raise ValidationError('Invalid email address')
 
-
-
 class WorkoutSchema(Schema):
-    id = fields.Int()
+    id = fields.Int(dump_only=True)
     title = fields.Str(required=True, validate=validate.Length(max=100))
-    description = fields.Str()
-    created_by = fields.Int()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
+    description = fields.Str(validate=validate.Length(max=2000))
+    created_by = fields.Int(dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
+
+    @validates_schema
+    def validate_workout(self, data, **kwargs):
+        if 'title' in data and not data['title'].strip():
+            raise ValidationError('Title must not be blank.', 'title')
+        if 'description' in data and data.get('description') and not data['description'].strip():
+            raise ValidationError('Description must not be blank if provided.', 'description')
