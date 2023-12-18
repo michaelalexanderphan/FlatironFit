@@ -35,11 +35,14 @@ function Signup() {
       ...(role === 'trainer' && { secret_code: secretCode }) 
     };
   
-    // Log userData to the console before the request
-    console.log(userData);
+    const config = {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
   
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await axios.post('/api/auth/register', userData, config);
       if (response.status === 201) {
         navigate('/login');
       }
@@ -48,7 +51,6 @@ function Signup() {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <div>

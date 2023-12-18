@@ -19,45 +19,46 @@ class Register(Resource):
     def post(self):
         json_data = request.get_json()
         if not json_data:
-            return jsonify({"msg": "No input data provided"}), 400
+            return {"msg": "No input data provided"}, 400
         
         if User.query.filter((User.username == json_data.get('username')) | (User.email == json_data.get('email'))).first():
-            return jsonify({"msg": "Username or email already exists"}), 409
+            return {"msg": "Username or email already exists"}, 409
 
         try:
-            user_data = user_schema.load(json_data, partial=("password",))
+            user_data = user_schema.load(json_data)
             user_data['password_hash'] = generate_password_hash(json_data['password'])
             new_user = User(**user_data)
             db.session.add(new_user)
             db.session.commit()
-            return jsonify({"msg": "User registered successfully", "user": user_schema.dump(new_user)}), 201
+            return {"msg": "User registered successfully", "user": user_schema.dump(new_user)}, 201
         except ValidationError as err:
-            return jsonify(err.messages), 422
+            return err.messages, 422
 
 class Login(Resource):
     def post(self):
         json_data = request.get_json()
         if not json_data:
-            return jsonify({"msg": "Missing username or password"}), 400
+            return {"msg": "Missing username or password"}, 400
         user = User.query.filter_by(username=json_data.get('username')).first()
         if user and user.check_password(json_data.get('password')):
             access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=1))
             refresh_token = create_refresh_token(identity=user.id, expires_delta=timedelta(days=30))
-            response = make_response(jsonify({
+            response_data = {
                 "msg": "Login successful",
                 "user": user_schema.dump(user),
                 "access_token": access_token,
                 "refresh_token": refresh_token
-            }), 200)
+            }
+            response = make_response(jsonify(response_data), 200)
             set_access_cookies(response, access_token)
             set_refresh_cookies(response, refresh_token)
             return response
-        return jsonify({"msg": "Bad username or password"}), 401
+        return {"msg": "Bad username or password"}, 401
 
 class Logout(Resource):
     @jwt_required()
     def post(self):
-        response = make_response(jsonify({"msg": "Logout successful"}), 200)
+        response = make_response({"msg": "Logout successful"}, 200)
         unset_jwt_cookies(response)
         return response
 
@@ -66,7 +67,8 @@ class TokenRefresh(Resource):
     def post(self):
         current_user = get_jwt_identity()
         new_access_token = create_access_token(identity=current_user, expires_delta=timedelta(hours=1))
-        response = make_response(jsonify({"access_token": new_access_token}), 200)
+        response_data = {"access_token": new_access_token}
+        response = make_response(jsonify(response_data), 200)
         set_access_cookies(response, new_access_token)
         return response
 
