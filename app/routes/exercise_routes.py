@@ -1,6 +1,4 @@
 from flask import Blueprint, request, jsonify
-from flask_restful import Api, Resource
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.models import Exercise
 from app.schemas import ExerciseSchema
@@ -14,9 +12,6 @@ exercises_schema = ExerciseSchema(many=True)
 class ExerciseList(Resource):
     @jwt_required()
     def get(self):
-        current_user_id = get_jwt_identity()
-        exercises = Exercise.query.filter_by(user_id=current_user_id).all()
-        return jsonify(exercises_schema.dump(exercises)), 200
 
     @jwt_required()
     def post(self):
@@ -30,19 +25,14 @@ class ExerciseList(Resource):
             new_exercise = Exercise(**exercise_data)
             db.session.add(new_exercise)
             db.session.commit()
-            return jsonify(exercise_schema.dump(new_exercise)), 201
+            serialized_exercise = exercise_schema.dump(new_exercise)
+            return jsonify(serialized_exercise), 201
         except ValidationError as err:
             return jsonify(err.messages), 422
 
 class ExerciseResource(Resource):
     @jwt_required()
     def get(self, exercise_id):
-        current_user_id = get_jwt_identity()
-        exercise = Exercise.query.filter_by(id=exercise_id, user_id=current_user_id).first_or_404()
-        return jsonify(exercise_schema.dump(exercise)), 200
-
-    @jwt_required()
-    def put(self, exercise_id):
         json_data = request.get_json()
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
@@ -53,14 +43,13 @@ class ExerciseResource(Resource):
             for key, value in exercise_data.items():
                 setattr(exercise, key, value)
             db.session.commit()
-            return jsonify(exercise_schema.dump(exercise)), 200
+            serialized_exercise = exercise_schema.dump(exercise)
+            return jsonify(serialized_exercise), 200
         except ValidationError as err:
             return jsonify(err.messages), 422
 
     @jwt_required()
     def delete(self, exercise_id):
-        current_user_id = get_jwt_identity()
-        exercise = Exercise.query.filter_by(id=exercise_id, user_id=current_user_id).first_or_404()
         db.session.delete(exercise)
         db.session.commit()
         return jsonify({'message': 'Exercise deleted successfully'}), 200

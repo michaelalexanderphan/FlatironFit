@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../../context/AuthContext';
 
 function ExerciseList() {
+  const { authToken } = useContext(AuthContext);
   const [exercises, setExercises] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -10,9 +12,18 @@ function ExerciseList() {
     fetchExercises();
   }, []);
 
+  const axiosWithAuth = () => {
+    return axios.create({
+      baseURL: '/api',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+  };
+
   const fetchExercises = async () => {
     try {
-      const response = await axios.get('/api/exercises');
+      const response = await axiosWithAuth().get('/exercises/exercises');
       setExercises(response.data);
       setError('');
     } catch (error) {
@@ -23,7 +34,8 @@ function ExerciseList() {
   };
 
   const deleteExercise = (exerciseId) => {
-    axios.delete(`/api/exercises/${exerciseId}`)
+    axiosWithAuth()
+      .delete(`/exercises/exercises/${exerciseId}`)
       .then(() => {
         fetchExercises();
       })
