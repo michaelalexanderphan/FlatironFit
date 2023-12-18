@@ -15,6 +15,9 @@ from flask_jwt_extended import (
 from datetime import timedelta
 from marshmallow import ValidationError
 from flask_restful import Api, Resource
+from config import Config
+
+
 
 auth_bp = Blueprint('auth_bp', __name__)
 api = Api(auth_bp)
@@ -36,16 +39,16 @@ class Register(Resource):
             user_data = json_data
             user_data['password_hash'] = password_hash
 
+            # Check if the role is 'trainer' and add secret_code from the configuration
+            if user_data.get('role') == 'trainer':
+                user_data['secret_code'] = Config.SECRET_CODE
+
             new_user = User(**user_data)
             db.session.add(new_user)
             db.session.commit()
             return {"msg": "User registered successfully", "user": user_schema.dump(new_user)}, 201
         except ValidationError as err:
-            print("Validation Error:", err.messages)  # Add this line for debugging
             return err.messages, 422
-
-
-api.add_resource(Register, '/register')
 
 class Login(Resource):
     def post(self):
@@ -85,6 +88,7 @@ class TokenRefresh(Resource):
         set_access_cookies(response, new_access_token)
         return response
 
+api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 api.add_resource(TokenRefresh, '/token/refresh')

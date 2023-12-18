@@ -34,12 +34,20 @@ class UserSchema(Schema):
     contact_info = fields.Str()
     bio = fields.Str()
     password_hash = fields.Str(dump_only=True)
+    secret_code = fields.Str() 
+
+    @pre_load
+    def process_input(self, data, **kwargs):
+        if 'password' in data:
+            data['password_hash'] = generate_password_hash(data.pop('password'))
+        return data
 
     @validates('email')
     def validate_email(self, value):
         pattern = r'^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
         if not re.match(pattern, value, re.IGNORECASE):
             raise ValidationError('Invalid email address')
+
 
 
 class WorkoutSchema(Schema):
