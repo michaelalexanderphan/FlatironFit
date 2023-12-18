@@ -31,6 +31,7 @@ class User(db.Model):
     workouts = db.relationship('Workout', secondary=UserWorkout, lazy='dynamic')
     messages_sent = db.relationship('Message', foreign_keys='Message.sender_id')
     messages_received = db.relationship('Message', foreign_keys='Message.receiver_id')
+    secret_code = db.Column(db.String(255))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
