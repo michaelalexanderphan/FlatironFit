@@ -18,23 +18,27 @@ function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     if (!validateEmail(email) || !validatePassword(password)) {
       setError('Invalid email or password format');
       setIsLoading(false);
       return;
     }
-
+  
+    const userData = { 
+      username, 
+      email, 
+      password, 
+      contact_info: contactInfo, 
+      bio, 
+      role, 
+      ...(role === 'trainer' && { secret_code: secretCode }) 
+    };
+  
+    // Log userData to the console before the request
+    console.log(userData);
+  
     try {
-      const userData = { 
-        username, 
-        email, 
-        password, 
-        contact_info: contactInfo, 
-        bio, 
-        role, 
-        ...(role === 'trainer' && { secret_code: secretCode }) 
-      };
       const response = await axios.post('/api/auth/register', userData);
       if (response.status === 201) {
         navigate('/login');
@@ -44,6 +48,7 @@ function Signup() {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div>
