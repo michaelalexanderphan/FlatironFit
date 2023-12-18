@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_cors import CORS
 import os
-from app.instance.config import DevelopmentConfig, ProductionConfig, TestingConfig
+from config import DevelopmentConfig, ProductionConfig, TestingConfig
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -13,12 +13,16 @@ migrate = Migrate()
 def create_app():
     app = Flask(__name__)
     env = os.getenv('FLASK_ENV', 'development')
+    
     if env == 'production':
         app.config.from_object(ProductionConfig)
     elif env == 'testing':
         app.config.from_object(TestingConfig)
     else:
         app.config.from_object(DevelopmentConfig)
+    
+    # Add this line to specify the config class directly
+    # app.config.from_object('config.DevelopmentConfig')
 
     db.init_app(app)
     jwt.init_app(app)
