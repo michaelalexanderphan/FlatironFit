@@ -1,13 +1,14 @@
 from flask import Blueprint, jsonify, request, make_response
-from flask_jwt_extended import (
-    create_access_token, create_refresh_token, jwt_required,
-    get_jwt_identity, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
-)
-from app.models.user import User
-from app.schemas import UserSchema
 from app import db
+from app.models.models import User  # Correct
+from app.schemas import UserSchema
+from werkzeug.security import generate_password_hash
+from flask_jwt_extended import (
+    create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+)
 from datetime import timedelta
 from marshmallow import ValidationError
+
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -18,16 +19,20 @@ def register():
     json_data = request.get_json()
     if not json_data:
         return jsonify({"msg": "No input data provided"}), 400
+    
+    # Check if user already exists
+    if User.query.filter((User.username == json_data.get('username')) | (User.email == json_data.get('email'))).first():
+        return jsonify({"msg": "Username or email already exists"}), 409
+
     try:
-        user_data = user_schema.load(json_data)
+        user_data = user_schema.load(json_data, partial=("password",))
+        user_data['password_hash'] = generate_password_hash(json_data['password'])
+        new_user = User(**user_data)
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"msg": "User registered successfully", "user": user_schema.dump(new_user)}), 201
     except ValidationError as err:
         return jsonify(err.messages), 422
-    if User.query.filter((User.username == user_data['username']) | (User.email == user_data['email'])).first():
-        return jsonify({"msg": "Username or email already exists"}), 409
-    new_user = User(**user_data)
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"msg": "User registered successfully", "user": user_schema.dump(new_user)}), 201
 
 @auth_bp.route('/login', methods=['POST'])
 def login():

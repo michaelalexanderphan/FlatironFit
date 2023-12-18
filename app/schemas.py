@@ -33,7 +33,7 @@ class UserSchema(Schema):
     email = fields.Email(required=True, validate=validate.Length(max=120))
     password = fields.Str(load_only=True, required=True, validate=validate.Length(min=6))
     role = fields.Str(required=True, validate=validate.OneOf(["trainer", "client"]))
-    profile_image = fields.Str()
+    # profile_image = fields.Str()
     contact_info = fields.Str()
     bio = fields.Str()
 

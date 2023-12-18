@@ -21,19 +21,14 @@ def create_app():
     else:
         app.config.from_object(DevelopmentConfig)
     
-    # Add this line to specify the config class directly
-    # app.config.from_object('config.DevelopmentConfig')
-
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
 
-    # Import the association table for many-to-many relationship between Users and Workouts
-    from app.models.user import User, UserWorkout
-    from app.models.workout import Workout
-    from app.models.exercise import Exercise
-    from app.models.message import Message
+    # Importing models from models.py
+    from app.models.models import User, Workout, Exercise, Message, UserWorkout
 
+    # Importing routes
     from app.routes.auth_routes import auth_bp
     from app.routes.workout_routes import workout_bp
     from app.routes.exercise_routes import exercise_bp

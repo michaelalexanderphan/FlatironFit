@@ -1,6 +1,6 @@
 from app.models.exercise import Exercise
 from app.models.message import Message
-from app.models.user import User
+from app.models.models import User
 from app.models.workout import Workout
 
 try:
