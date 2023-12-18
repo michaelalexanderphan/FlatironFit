@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models.workout import Workout
-from app.models.user import User, UserWorkout
+from app.models.models import Workout, User, UserWorkout  
 from app.schemas import WorkoutSchema
 from app import db
 from marshmallow import ValidationError
+
 
 workout_bp = Blueprint('workout_bp', __name__)
 

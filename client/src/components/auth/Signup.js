@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { validateEmail, validatePassword } from '../utils/validation';
+import { validateEmail, validatePassword } from '../utils/validations';
 
 function Signup() {
   const [username, setUsername] = useState('');
@@ -26,7 +26,15 @@ function Signup() {
     }
 
     try {
-      const userData = { username, email, password, contact_info: contactInfo, bio, role, ...(role === 'trainer' && { secret_code: secretCode }) };
+      const userData = { 
+        username, 
+        email, 
+        password, 
+        contact_info: contactInfo, 
+        bio, 
+        role, 
+        ...(role === 'trainer' && { secret_code: secretCode }) 
+      };
       const response = await axios.post('/api/auth/register', userData);
       if (response.status === 201) {
         navigate('/login');
@@ -50,9 +58,19 @@ function Signup() {
           <option value="client">Client</option>
           <option value="trainer">Trainer</option>
         </select>
-        {role === 'trainer' && <input id="secretCode" type="text" value={secretCode} onChange={(e) => setSecretCode(e.target.value)} disabled={isLoading} placeholder="Enter secret code" />}
+        {role === 'trainer' && (
+          <input 
+            id="secretCode" 
+            type="text" 
+            value={secretCode} 
+            onChange={(e) => setSecretCode(e.target.value)} 
+            disabled={isLoading} 
+            placeholder="Enter secret code" 
+          />
+        )}
         <button type="submit" disabled={isLoading}>Sign Up</button>
       </form>
+      {error && <p>{error}</p>}
     </div>
   );
 }

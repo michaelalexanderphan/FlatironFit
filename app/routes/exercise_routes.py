@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
-from app.models.exercise import Exercise
+from app.models.models import Exercise
 from app.schemas import ExerciseSchema
 from app import db
 from marshmallow import ValidationError
