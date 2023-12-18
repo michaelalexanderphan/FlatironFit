@@ -7,8 +7,6 @@ import Signup from './components/auth/Signup';
 import NotFound from './views/NotFound';
 import { AuthProvider } from './context/AuthContext';
 import Dashboard from './views/Dashboard';
-import Workouts from './views/Workouts'; 
-import Messages from './views/Messages'; 
 
 function App() {
   return (
@@ -19,9 +17,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/workouts" element={<Workouts />} /> 
-          <Route path="/messages" element={<Messages />} /> 
+          <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

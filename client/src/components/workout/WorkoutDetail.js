@@ -14,7 +14,6 @@ function WorkoutDetail({ workoutId }) {
         setError('Failed to fetch workout details');
       }
     };
-
     fetchWorkoutDetail();
   }, [workoutId]);
 

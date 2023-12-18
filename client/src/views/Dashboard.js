@@ -8,7 +8,7 @@ import Exercises from '../components/exercise/ExerciseList';
 import Messaging from '../components/message/MessageList';
 import MessageForm from '../components/message/MessageForm';
 import UserProfile from '../components/user/UserProfile';
-import UserProfileEdit from '../components/user/UserProfileEdit'; // Import the edit component
+import UserProfileEdit from '../components/user/UserProfileEdit';
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
@@ -48,5 +48,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-

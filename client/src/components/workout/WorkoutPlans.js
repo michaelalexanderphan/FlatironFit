@@ -11,7 +11,7 @@ function WorkoutPlans() {
     setError('');
 
     const authToken = sessionStorage.getItem('authToken');
-    axios.get('/api/workouts/workouts', {
+    axios.get('/api/workouts', {
       headers: { Authorization: `Bearer ${authToken}` },
     })
     .then(response => {
@@ -19,7 +19,6 @@ function WorkoutPlans() {
     })
     .catch(error => {
       setError('Failed to fetch workouts');
-      console.error('Error fetching workouts', error);
     })
     .finally(() => {
       setIsLoading(false);
