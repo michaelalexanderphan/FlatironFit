@@ -1,155 +1,177 @@
 import pytest
-from flask_testing import TestCase
 from app import create_app, db
-from app.models.models import User, Workout, Exercise, Message, UserWorkout
 from werkzeug.security import generate_password_hash
+from app.models.models import User
 
-class TestBase(TestCase):
-    def create_app(self):
-        app = create_app()
-        app.config.update(
-            SQLALCHEMY_DATABASE_URI='sqlite:///:memory:',
-            TESTING=True,
-            WTF_CSRF_ENABLED=False,
-            SECRET_KEY='testsecret'
-        )
-        return app
-
-    def setUp(self):
+@pytest.fixture(scope="module")
+def app():
+    app = create_app()
+    app.config.update({
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        'TESTING': True,
+        'WTF_CSRF_ENABLED': False,
+        'SECRET_KEY': 'testsecret'
+    })
+    with app.app_context():
         db.create_all()
-        hashed_password = generate_password_hash('testpassword')  # Hash the test password here
-        user = User(username='testuser', email='test@test.com', password_hash=hashed_password, role='client')
-        db.session.add(user)
-        db.session.commit()
-
-    def tearDown(self):
+        yield app
         db.session.remove()
         db.drop_all()
 
-    def login(self):
-        return self.client.post('/api/auth/login', json={
+@pytest.fixture(scope="module")
+def client(app):
+    return app.test_client()
+
+@pytest.fixture(scope="module")
+def init_database():
+    hashed_password = generate_password_hash('testpassword')
+    user = User(username='testuser', email='test@test.com', password_hash=hashed_password, role='client')
+
+    db.session.add(user)
+    db.session.commit()
+
+    yield db
+
+    db.session.remove()
+    db.drop_all()
+
+def test_register(client, init_database):
+    response = client.post('/api/auth/register', json={
+        'username': 'newuser',
+        'email': 'newuser@test.com',
+        'password': 'newpassword',
+        'role': 'client'
+    })
+    assert response.status_code == 201
+
+def test_login(client, init_database):
+    response = client.post('/api/auth/login', json={
         'username': 'testuser',
         'password': 'testpassword'
-        })
+    })
+    assert response.status_code == 200
 
+def get_auth_token(client):
+    response = client.post('/api/auth/login', json={
+        'username': 'testuser',
+        'password': 'testpassword'
+    })
+    return response.json['access_token']
 
-class TestAuthRoutes(TestBase):
-    
-    def test_register(self):
-        response = self.client.post('/api/auth/register', json={
-            'username': 'newuser',
-            'email': 'newuser@test.com',
-            'password': 'newpassword',
-            'role': 'client'
-        })
-        assert response.status_code == 201
+def test_logout(client, init_database):
+    token = get_auth_token(client)
+    response = client.post('/api/auth/logout', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_login(self):
-        response = self.login()
-        assert response.status_code == 200
+def test_token_refresh(client, init_database):
+    token = get_auth_token(client)
+    refresh_token = client.post('/api/auth/login', json={
+        'username': 'testuser',
+        'password': 'testpassword'
+    }).json['refresh_token']
+    response = client.post('/api/auth/token/refresh', headers={'Authorization': f'Bearer {refresh_token}'})
+    assert response.status_code == 200
 
-    def test_logout(self):
-        login_response = self.login()
-        token = login_response.json['access_token']
-        response = self.client.post('/api/auth/logout', headers={'Authorization': f'Bearer {token}'})
-        assert response.status_code == 200
+def test_get_exercise_list(client, init_database):
+    token = get_auth_token(client)
+    response = client.get('/api/exercises', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_token_refresh(self):
-        login_response = self.login()
-        refresh_token = login_response.json['refresh_token']
-        response = self.client.post('/api/auth/token/refresh', headers={'Authorization': f'Bearer {refresh_token}'})
-        assert response.status_code == 200
+def test_create_exercise(client, init_database):
+    token = get_auth_token(client)
+    response = client.post('/api/exercises/exercises', json={
+        'name': 'Squat',
+        'description': 'A basic squat exercise',
+        'body_part': 'legs',
+        'difficulty': 'medium',
+        'youtube_url': 'https://www.youtube.com/watch?v=aclHkVaku9U'
+    }, headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 201
 
-class TestExerciseRoutes(TestBase):
-    def test_get_exercise_list(self):
-        login_response = self.login()
-        token = login_response.json['access_token']
-        response = self.client.get('/api/exercises', headers={'Authorization': f'Bearer {token}'})
-        assert response.status_code == 200
+def test_get_single_exercise(client, init_database):
+    token = get_auth_token(client)
+    response = client.get('/api/exercises/exercises/1', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_create_exercise(self):
-        response = self.client.post('/api/exercises', json={
-            'name': 'Squat',
-            'description': 'A basic squat exercise',
-            'body_part': 'legs',
-            'difficulty': 'medium',
-            'youtube_url': 'https://www.youtube.com/watch?v=aclHkVaku9U'
-        })
-        assert response.status_code == 201
+def test_update_exercise(client, init_database):
+    token = get_auth_token(client)
+    response = client.put('/api/exercises/exercises/1', json={
+        'name': 'Updated Squat',
+        'description': 'An updated basic squat exercise'
+    }, headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_get_single_exercise(self):
-        response = self.client.get('/api/exercises/1')
-        assert response.status_code == 200
+def test_delete_exercise(client, init_database):
+    token = get_auth_token(client)
+    response = client.delete('/api/exercises/exercises/1', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_update_exercise(self):
-        response = self.client.put('/api/exercises/1', json={
-            'name': 'Updated Squat',
-            'description': 'An updated basic squat exercise'
-        })
-        assert response.status_code == 200
+def test_get_message_list(client, init_database):
+    token = get_auth_token(client)
+    response = client.get('/api/messages/messages', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_delete_exercise(self):
-        response = self.client.delete('/api/exercises/1')
-        assert response.status_code == 200
+def test_post_message(client, init_database):
+    token = get_auth_token(client)
+    response = client.post('/api/messages/messages', json={
+        'sender_id': 1,
+        'receiver_id': 2,
+        'content': 'Hello World'
+    }, headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 201
 
-class TestMessageRoutes(TestBase):
-    def test_get_message_list(self):
-        response = self.client.get('/api/messages')
-        assert response.status_code == 200
+def test_delete_message(client, init_database):
+    token = get_auth_token(client)
+    response = client.delete('/api/messages/messages/1', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_post_message(self):
-        response = self.client.post('/api/messages', json={
-            'sender_id': 1,
-            'receiver_id': 2,
-            'content': 'Hello World'
-        })
-        assert response.status_code == 201
+def test_update_message(client, init_database):
+    token = get_auth_token(client)
+    response = client.put('/api/messages/messages/1', json={
+        'content': 'Updated Message'
+    }, headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_delete_message(self):
-        response = self.client.delete('/api/messages/1')
-        assert response.status_code == 200
+def test_get_user(client, init_database):
+    token = get_auth_token(client)
+    response = client.get('/api/users/users/1', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_update_message(self):
-        response = self.client.put('/api/messages/1', json={
-            'content': 'Updated Message'
-        })
-        assert response.status_code == 200
+def test_update_user(client, init_database):
+    token = get_auth_token(client)
+    response = client.patch('/api/users/users/1', json={
+        'username': 'updateduser',
+        'email': 'updateduser@test.com'
+    }, headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-class TestUserRoutes(TestBase):
-    def test_get_user(self):
-        response = self.client.get('/api/users/1')
-        assert response.status_code == 200
+def test_delete_user(client, init_database):
+    token = get_auth_token(client)
+    response = client.delete('/api/users/users/1', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_update_user(self):
-        response = self.client.patch('/api/users/1', json={
-            'username': 'updateduser',
-            'email': 'updateduser@test.com'
-        })
-        assert response.status_code == 200
+def test_get_workout_list(client, init_database):
+    token = get_auth_token(client)
+    response = client.get('/api/workouts/workouts', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_delete_user(self):
-        response = self.client.delete('/api/users/1')
-        assert response.status_code == 200
+def test_create_workout(client, init_database):
+    token = get_auth_token(client)
+    response = client.post('/api/workouts/workouts', json={
+        'title': 'Leg Day',
+        'description': 'A series of exercises focused on legs'
+    }, headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 201
 
-class TestWorkoutRoutes(TestBase):
-    def test_get_workout_list(self):
-        response = self.client.get('/api/workouts')
-        assert response.status_code == 200
+def test_update_workout(client, init_database):
+    token = get_auth_token(client)
+    response = client.put('/api/workouts/workouts/1', json={
+        'title': 'Updated Leg Day',
+        'description': 'An updated series of exercises focused on legs'
+    }, headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200
 
-    def test_create_workout(self):
-        response = self.client.post('/api/workouts', json={
-            'title': 'Leg Day',
-            'description': 'A series of exercises focused on legs'
-        })
-        assert response.status_code == 201
-
-    def test_update_workout(self):
-        response = self.client.put('/api/workouts/1', json={
-            'title': 'Updated Leg Day',
-            'description': 'An updated series of exercises focused on legs'
-        })
-        assert response.status_code == 200
-
-    def test_delete_workout(self):
-        response = self.client.delete('/api/workouts/1')
-        assert response.status_code == 200
+def test_delete_workout(client, init_database):
+    token = get_auth_token(client)
+    response = client.delete('/api/workouts/workouts/1', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == 200

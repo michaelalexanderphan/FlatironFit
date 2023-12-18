@@ -23,8 +23,9 @@ function Login() {
 
     try {
       const response = await axios.post('/api/auth/login', { username, password });
-      login(response.data.user, response.data.access_token); 
-      navigate('/dashboard'); 
+      login(response.data.user, response.data.access_token);
+      console.log('Token:', response.data.access_token); // Log the token
+      navigate('/dashboard');
       toast.success('Logged in successfully!');
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Login failed. Please try again later.');
@@ -37,7 +38,7 @@ function Login() {
     <div>
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-      <div>
+        <div>
           <label htmlFor="username">Username</label>
           <input
             id="username"

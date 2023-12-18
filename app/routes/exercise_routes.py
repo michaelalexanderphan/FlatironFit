@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, reqparse, abort
 from flask_jwt_extended import jwt_required
 from app import db
 from app.models.models import Exercise
@@ -15,7 +15,8 @@ class ExerciseList(Resource):
     @jwt_required()
     def get(self):
         exercises = Exercise.query.all()
-        return jsonify(exercises_schema.dump(exercises)), 200
+        serialized_exercises = exercises_schema.dump(exercises)
+        return jsonify(serialized_exercises), 200
 
     @jwt_required()
     def post(self):
@@ -27,19 +28,25 @@ class ExerciseList(Resource):
             new_exercise = Exercise(**exercise_data)
             db.session.add(new_exercise)
             db.session.commit()
-            return jsonify(exercise_schema.dump(new_exercise)), 201
+            serialized_exercise = exercise_schema.dump(new_exercise)
+            return jsonify(serialized_exercise), 201
         except ValidationError as err:
             return jsonify(err.messages), 422
 
 class ExerciseResource(Resource):
     @jwt_required()
     def get(self, exercise_id):
-        exercise = Exercise.query.get_or_404(exercise_id)
-        return jsonify(exercise_schema.dump(exercise)), 200
+        exercise = Exercise.query.get(exercise_id)
+        if exercise is None:
+            return abort(404, message="Exercise not found")
+        serialized_exercise = exercise_schema.dump(exercise)
+        return jsonify(serialized_exercise), 200
 
     @jwt_required()
     def put(self, exercise_id):
-        exercise = Exercise.query.get_or_404(exercise_id)
+        exercise = Exercise.query.get(exercise_id)
+        if exercise is None:
+            return abort(404, message="Exercise not found")
         json_data = request.get_json()
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
@@ -48,13 +55,16 @@ class ExerciseResource(Resource):
             for key, value in exercise_data.items():
                 setattr(exercise, key, value)
             db.session.commit()
-            return jsonify(exercise_schema.dump(exercise)), 200
+            serialized_exercise = exercise_schema.dump(exercise)
+            return jsonify(serialized_exercise), 200
         except ValidationError as err:
             return jsonify(err.messages), 422
 
     @jwt_required()
     def delete(self, exercise_id):
-        exercise = Exercise.query.get_or_404(exercise_id)
+        exercise = Exercise.query.get(exercise_id)
+        if exercise is None:
+            return abort(404, message="Exercise not found")
         db.session.delete(exercise)
         db.session.commit()
         return jsonify({'message': 'Exercise deleted successfully'}), 200
