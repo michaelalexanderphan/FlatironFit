@@ -26,13 +26,15 @@ class TestBase(TestCase):
         db.session.remove()
         db.drop_all()
 
-class TestAuthRoutes(TestBase):
     def login(self):
         return self.client.post('/api/auth/login', json={
-            'username': 'testuser',
-            'password': 'testpassword'
+        'username': 'testuser',
+        'password': 'testpassword'
         })
 
+
+class TestAuthRoutes(TestBase):
+    
     def test_register(self):
         response = self.client.post('/api/auth/register', json={
             'username': 'newuser',
@@ -60,7 +62,9 @@ class TestAuthRoutes(TestBase):
 
 class TestExerciseRoutes(TestBase):
     def test_get_exercise_list(self):
-        response = self.client.get('/api/exercises')
+        login_response = self.login()
+        token = login_response.json['access_token']
+        response = self.client.get('/api/exercises', headers={'Authorization': f'Bearer {token}'})
         assert response.status_code == 200
 
     def test_create_exercise(self):
