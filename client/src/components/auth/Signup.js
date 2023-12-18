@@ -18,31 +18,35 @@ function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     if (!validateEmail(email) || !validatePassword(password)) {
       setError('Invalid email or password format');
       setIsLoading(false);
       return;
     }
-  
-    const userData = { 
-      username, 
-      email, 
-      password, 
-      contact_info: contactInfo, 
-      bio, 
-      role, 
-      ...(role === 'trainer' && { secret_code: secretCode }) 
+
+    const userData = {
+      username,
+      email,
+      password,
+      contact_info: contactInfo,
+      bio,
+      role,
+      ...(role === 'trainer' && { secret_code: secretCode }),
     };
-  
+
     const config = {
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     };
-  
+
     try {
-      const response = await axios.post('/api/auth/register', userData, config);
+      const response = await axios.post(
+        'http://localhost:5000/api/auth/register',
+        userData,
+        config
+      );
       if (response.status === 201) {
         navigate('/login');
       }
@@ -56,26 +60,77 @@ function Signup() {
     <div>
       <h2>Signup</h2>
       <form onSubmit={handleSignup}>
-        <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} disabled={isLoading} />
-        <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} />
-        <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} />
-        <input id="contactInfo" type="text" value={contactInfo} onChange={(e) => setContactInfo(e.target.value)} disabled={isLoading} />
-        <textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} disabled={isLoading} />
-        <select id="role" value={role} onChange={(e) => setRole(e.target.value)} disabled={isLoading}>
+        <label htmlFor="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          disabled={isLoading}
+        />
+
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={isLoading}
+        />
+
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={isLoading}
+        />
+
+        <label htmlFor="contactInfo">Contact Info</label>
+        <input
+          id="contactInfo"
+          type="text"
+          value={contactInfo}
+          onChange={(e) => setContactInfo(e.target.value)}
+          disabled={isLoading}
+        />
+
+        <label htmlFor="bio">Bio</label>
+        <textarea
+          id="bio"
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          disabled={isLoading}
+        />
+
+        <label htmlFor="role">Role</label>
+        <select
+          id="role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          disabled={isLoading}
+        >
           <option value="client">Client</option>
           <option value="trainer">Trainer</option>
         </select>
+
         {role === 'trainer' && (
-          <input 
-            id="secretCode" 
-            type="text" 
-            value={secretCode} 
-            onChange={(e) => setSecretCode(e.target.value)} 
-            disabled={isLoading} 
-            placeholder="Enter secret code" 
-          />
+          <>
+            <label htmlFor="secretCode">Secret Code (for trainers only)</label>
+            <input
+              id="secretCode"
+              type="text"
+              value={secretCode}
+              onChange={(e) => setSecretCode(e.target.value)}
+              disabled={isLoading}
+              placeholder="Enter secret code"
+            />
+          </>
         )}
-        <button type="submit" disabled={isLoading}>Sign Up</button>
+        <button type="submit" disabled={isLoading}>
+          Sign Up
+        </button>
       </form>
       {error && <p>{error}</p>}
     </div>
