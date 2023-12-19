@@ -40,7 +40,7 @@ function ExerciseForm({ exerciseId, onExerciseSaved }) {
       if (exerciseId) {
         response = await axios.put(`/api/exercises/${exerciseId}`, exercise);
       } else {
-        response = await axios.post('/api/exercises', exercise);
+        response = await axios.post('/api/exercises/', exercise);
       }
       onExerciseSaved(response.data);
     } catch (error) {
