@@ -6,7 +6,7 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
     SECRET_CODE = 'trainer'
-    SQLALCHEMY_DATABASE_URI = 'sqlite://///home/michaelphan/Development/code/Final-Project/FlatironFit/instance/flatironfit.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///mydatabase.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(Config):
