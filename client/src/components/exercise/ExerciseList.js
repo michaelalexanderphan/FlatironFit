@@ -22,12 +22,14 @@ function ExerciseList() {
   };
 
   const fetchExercises = async () => {
+    console.log('Token:', authToken); // This line logs the token
     try {
       const response = await axiosWithAuth().get('/exercises/exercises');
       setExercises(response.data);
       setError('');
     } catch (error) {
       setError('Failed to fetch exercises');
+      console.error('Error fetching exercises:', error.response); // Log detailed error response if needed
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +42,7 @@ function ExerciseList() {
         fetchExercises();
       })
       .catch(error => {
-        console.error('Error deleting exercise', error);
+        console.error('Error deleting exercise', error.response); // Log detailed error response if needed
       });
   };
 
