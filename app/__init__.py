@@ -13,7 +13,6 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
-    api = Api(app)
     env = os.getenv('FLASK_ENV', 'development')
 
     if env == 'production':
@@ -27,7 +26,7 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
 
-    # Importing models from models.py
+   
     from app.models.models import User, Workout, Exercise, Message, UserWorkout
 
     # Importing routes
