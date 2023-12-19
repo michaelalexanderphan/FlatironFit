@@ -1,7 +1,7 @@
 import pytest
 from app import create_app, db
 from werkzeug.security import generate_password_hash
-from app.models.models import User
+from app.models.models import User, Exercise, Message, Workout
 
 @pytest.fixture(scope="module")
 def app():
@@ -24,10 +24,25 @@ def client(app):
 
 @pytest.fixture(scope="module")
 def init_database():
+    # Create a test user
     hashed_password = generate_password_hash('testpassword')
     user = User(username='testuser', email='test@test.com', password_hash=hashed_password, role='client')
-
     db.session.add(user)
+
+    # Create a test exercise
+    exercise = Exercise(
+        name='Squat',
+        description='A basic squat exercise',
+        body_part='legs',
+        difficulty='medium',
+        youtube_url='https://www.youtube.com/watch?v=aclHkVaku9U'
+    )
+    db.session.add(exercise)
+
+    # Create a test workout
+    workout = Workout(title='Leg Day', description='A series of exercises focused on legs', created_by=user.id)
+    db.session.add(workout)
+
     db.session.commit()
 
     yield db
@@ -35,6 +50,14 @@ def init_database():
     db.session.remove()
     db.drop_all()
 
+def get_auth_token(client):
+    response = client.post('/api/auth/login', json={
+        'username': 'testuser',
+        'password': 'testpassword'
+    })
+    return response.json['access_token']
+
+# Authentication and Authorization Tests
 def test_register(client, init_database):
     response = client.post('/api/auth/register', json={
         'username': 'newuser',
@@ -51,13 +74,6 @@ def test_login(client, init_database):
     })
     assert response.status_code == 200
 
-def get_auth_token(client):
-    response = client.post('/api/auth/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
-    })
-    return response.json['access_token']
-
 def test_logout(client, init_database):
     token = get_auth_token(client)
     response = client.post('/api/auth/logout', headers={'Authorization': f'Bearer {token}'})
@@ -72,6 +88,7 @@ def test_token_refresh(client, init_database):
     response = client.post('/api/auth/token/refresh', headers={'Authorization': f'Bearer {refresh_token}'})
     assert response.status_code == 200
 
+# Exercise Tests
 def test_get_exercise_list(client, init_database):
     token = get_auth_token(client)
     response = client.get('/api/exercises', headers={'Authorization': f'Bearer {token}'})
@@ -106,6 +123,7 @@ def test_delete_exercise(client, init_database):
     response = client.delete('/api/exercises/exercises/1', headers={'Authorization': f'Bearer {token}'})
     assert response.status_code == 200
 
+# Message Tests
 def test_get_message_list(client, init_database):
     token = get_auth_token(client)
     response = client.get('/api/messages/messages', headers={'Authorization': f'Bearer {token}'})
@@ -132,6 +150,7 @@ def test_update_message(client, init_database):
     }, headers={'Authorization': f'Bearer {token}'})
     assert response.status_code == 200
 
+# User Tests
 def test_get_user(client, init_database):
     token = get_auth_token(client)
     response = client.get('/api/users/users/1', headers={'Authorization': f'Bearer {token}'})
@@ -150,6 +169,7 @@ def test_delete_user(client, init_database):
     response = client.delete('/api/users/users/1', headers={'Authorization': f'Bearer {token}'})
     assert response.status_code == 200
 
+# Workout Tests
 def test_get_workout_list(client, init_database):
     token = get_auth_token(client)
     response = client.get('/api/workouts/workouts', headers={'Authorization': f'Bearer {token}'})
