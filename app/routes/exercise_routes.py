@@ -23,28 +23,28 @@ class ExerciseList(Resource):
     def post(self):
         json_data = request.get_json()
         if not json_data:
-            return jsonify({'message': 'No input data provided'}), 400
+            return ({'message': 'No input data provided'}), 400
         try:
             exercise_data = exercise_schema.load(json_data)
             new_exercise = Exercise(**exercise_data)
             db.session.add(new_exercise)
             db.session.commit()
-            return jsonify(exercise_schema.dump(new_exercise)), 201
+            return (exercise_schema.dump(new_exercise)), 201
         except Exception as err:
-            return jsonify(err.messages), 422
+            return (err.messages), 422
 
 class ExerciseResource(Resource):
     @jwt_required()
     def get(self, exercise_id):
         exercise = Exercise.query.get_or_404(exercise_id)
-        return jsonify(exercise_schema.dump(exercise)), 200
+        return (exercise_schema.dump(exercise)), 200
 
     @jwt_required()
     def put(self, exercise_id):
         exercise = Exercise.query.get_or_404(exercise_id)
         json_data = request.get_json()
         if not json_data:
-            return jsonify({'message': 'No input data provided'}), 400
+            return ({'message': 'No input data provided'}), 400
         try:
             exercise_data = exercise_schema.load(json_data, partial=True)
             for key, value in exercise_data.items():
@@ -52,14 +52,14 @@ class ExerciseResource(Resource):
             db.session.commit()
             return jsonify(exercise_schema.dump(exercise)), 200
         except Exception as err:
-            return jsonify(err.messages), 422
+            return j(err.messages), 422
 
     # @jwt_required()
     def delete(self, exercise_id):
         exercise = Exercise.query.get_or_404(exercise_id)
         db.session.delete(exercise)
         db.session.commit()
-        return jsonify({'message': 'Exercise deleted successfully'}), 200
+        return ({'message': 'Exercise deleted successfully'}), 200
 
 api.add_resource(ExerciseList, '/exercises')
 api.add_resource(ExerciseResource, '/exercises/<int:exercise_id>')

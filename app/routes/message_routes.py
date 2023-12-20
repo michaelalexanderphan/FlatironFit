@@ -1,8 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.models import Message, User
+from app.models.models import Message
 from app.schemas import MessageSchema
 from marshmallow import ValidationError
 
@@ -15,15 +15,18 @@ class MessageList(Resource):
     @jwt_required()
     def get(self):
         current_user_id = get_jwt_identity()
-        messages = Message.query.filter((Message.sender_id == current_user_id) | (Message.receiver_id == current_user_id)).all()
-        return jsonify(messages_schema.dump(messages)), 200
+        messages = Message.query.filter(
+            (Message.sender_id == current_user_id) | 
+            (Message.receiver_id == current_user_id)
+        ).all()
+        return messages_schema.dump(messages), 200
 
     @jwt_required()
     def post(self):
         current_user_id = get_jwt_identity()
         json_data = request.get_json()
         if not json_data:
-            return jsonify({'message': 'No input data provided'}), 400
+            return {'message': 'No input data provided'}, 400
 
         try:
             message_data = message_schema.load(json_data)
@@ -31,9 +34,9 @@ class MessageList(Resource):
             new_message = Message(**message_data)
             db.session.add(new_message)
             db.session.commit()
-            return jsonify(message_schema.dump(new_message)), 201
+            return message_schema.dump(new_message), 201
         except ValidationError as err:
-            return jsonify(err.messages), 422
+            return err.messages, 422
 
 class SingleMessage(Resource):
     @jwt_required()
@@ -41,26 +44,26 @@ class SingleMessage(Resource):
         current_user_id = get_jwt_identity()
         message = Message.query.get_or_404(message_id)
         if message.sender_id != current_user_id:
-            return jsonify({'message': 'Unauthorized'}), 403
+            return {'message': 'Unauthorized'}, 403
         db.session.delete(message)
         db.session.commit()
-        return jsonify({'message': 'Message deleted successfully'}), 200
+        return {'message': 'Message deleted successfully'}, 200
 
     @jwt_required()
     def put(self, message_id):
         current_user_id = get_jwt_identity()
         message = Message.query.get_or_404(message_id)
         if message.sender_id != current_user_id:
-            return jsonify({'message': 'Unauthorized'}), 403
+            return {'message': 'Unauthorized'}, 403
         json_data = request.get_json()
         try:
             message_data = message_schema.load(json_data, partial=True)
             for key, value in message_data.items():
                 setattr(message, key, value)
             db.session.commit()
-            return jsonify(message_schema.dump(message)), 200
+            return message_schema.dump(message), 200
         except ValidationError as err:
-            return jsonify(err.messages), 422
+            return err.messages, 422
 
 api.add_resource(MessageList, '/messages')
 api.add_resource(SingleMessage, '/messages/<int:message_id>')

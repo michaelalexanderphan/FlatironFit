@@ -4,8 +4,11 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function UserProfileEdit() {
-  const { user, setUser } = useContext(AuthContext);
-  const [formData, setFormData] = useState({
+  const authContext = useContext(AuthContext);
+  const { user, setUser } = authContext;
+  const token = authContext.token; // Extract token from context
+
+  const [formData, setFormData] = useState({ // This line was missing
     username: '',
     email: '',
     contact_info: '',
@@ -37,7 +40,12 @@ function UserProfileEdit() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.patch(`/users/${user.id}`, formData);
+      const response = await axios.patch(`/api/users/${user.id}`, formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Now 'token' should be defined
+        }
+      });
       setUser(response.data);
       navigate('/dashboard/profile/');
     } catch (error) {
