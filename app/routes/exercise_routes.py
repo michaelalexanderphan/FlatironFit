@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required
 from app import db
 from app.models.models import Exercise
 from app.schemas import ExerciseSchema
-from marshmallow import ValidationError
+
 
 exercise_bp = Blueprint('exercise_bp', __name__)
 api = Api(exercise_bp)
@@ -15,7 +15,9 @@ class ExerciseList(Resource):
     @jwt_required()
     def get(self):
         exercises = Exercise.query.all()
-        return jsonify(exercises_schema.dump(exercises)), 200
+        print(exercises)
+        return exercises_schema.dump(exercises), 200
+        
 
     @jwt_required()
     def post(self):
@@ -28,7 +30,7 @@ class ExerciseList(Resource):
             db.session.add(new_exercise)
             db.session.commit()
             return jsonify(exercise_schema.dump(new_exercise)), 201
-        except ValidationError as err:
+        except Exception as err:
             return jsonify(err.messages), 422
 
 class ExerciseResource(Resource):
@@ -49,10 +51,10 @@ class ExerciseResource(Resource):
                 setattr(exercise, key, value)
             db.session.commit()
             return jsonify(exercise_schema.dump(exercise)), 200
-        except ValidationError as err:
+        except Exception as err:
             return jsonify(err.messages), 422
 
-    @jwt_required()
+    # @jwt_required()
     def delete(self, exercise_id):
         exercise = Exercise.query.get_or_404(exercise_id)
         db.session.delete(exercise)

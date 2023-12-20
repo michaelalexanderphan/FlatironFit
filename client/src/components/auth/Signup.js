@@ -25,6 +25,12 @@ function Signup() {
       return;
     }
 
+    if (role === 'trainer' && secretCode !== 'trainer') {
+      setError('Invalid secret code for trainer');
+      setIsLoading(false);
+      return;
+    }
+
     const userData = {
       username,
       email,

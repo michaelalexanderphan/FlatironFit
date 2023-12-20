@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_cors import CORS
+# from flask_cors import CORS
 from app import db
 from app.models.models import User
 from app.schemas import UserSchema
@@ -12,7 +12,7 @@ user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
 # Initialize CORS with your blueprint
-CORS(user_bp)
+# CORS(user_bp)
 
 class UserResource(Resource):
     @jwt_required()

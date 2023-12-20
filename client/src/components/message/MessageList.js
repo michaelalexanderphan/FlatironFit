@@ -8,7 +8,7 @@ function MessageList({ currentUserId, authToken }) {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get('/messages', {
+        const response = await axios.get('/api/messages', {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         setMessages(response.data);

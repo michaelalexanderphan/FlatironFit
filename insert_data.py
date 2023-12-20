@@ -13,7 +13,7 @@ exercise_data = {
     "difficulty": "easy",
     "youtube_url": "https://www.youtube.com/watch?v=IODxDxX7oi4"
 }
-
+\
 def insert_exercise():
     try:
         # Create a new Exercise object and add it to the database
