@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import '../styling/Home.css';
 
 function Home() {
   const { user } = useContext(AuthContext);
@@ -13,14 +14,24 @@ function Home() {
   }, [user, navigate]);
 
   return (
-    <div className="container">
-      <h1>Welcome to FlatironFit</h1>
-      {!user && (
-        <div className="auth-box">
-          <Link to="/login" className="auth-link">Login</Link>
-          <Link to="/signup" className="auth-link">Signup</Link>
+    <div className="home-container">
+      <div className="content">
+        <h1>Welcome to Flatiron FitFlow</h1>
+        <div className="info-box">
+          <h3>Stay Engaged with Personalized Workout Plans</h3>
+          <p>Our platform empowers trainers to create and assign tailored workout plans to their clients. Keep track of your fitness journey, communicate with your trainer, and manage your workout calendar all in one place. Our features are designed to help you stay committed and reach your fitness goals with ease.</p>
+          <button className="learn-more-button">Discover More</button>
         </div>
-      )}
+        {!user && (
+          <div className="auth-box">
+            <Link to="/login" className="auth-link login-btn">Login</Link>
+            <Link to="/signup" className="auth-link signup-btn">Signup</Link>
+          </div>
+        )}
+      </div>
+      <div className="logo-container">
+        <img src="path-to-your-logo.png" alt="Flatiron FitFlow Logo" />
+      </div>
     </div>
   );
 }

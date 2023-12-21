@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import '../../styling/Login.css';
 
 function Login() {
   const { login } = useContext(AuthContext);
@@ -36,33 +37,35 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Log In'}
-        </button>
-      </form>
+    <div className="login-container">
+      <div className="login-box">
+        <h2>Login</h2>
+        <form onSubmit={handleLogin} className="login-form">
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <button type="submit" disabled={isLoading} className="login-button">
+            {isLoading ? 'Logging in...' : 'Log In'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
