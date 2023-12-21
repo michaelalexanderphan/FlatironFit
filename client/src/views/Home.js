@@ -16,9 +16,8 @@ function Home() {
   return (
     <div className="home-container">
       <div className="content">
-        <h1>Welcome to Flatiron FitFlow</h1>
-        <div className="info-box">
-          <h3>Stay Engaged with Personalized Workout Plans</h3>
+      <h1 className="welcome-heading">Welcome to Flatiron FitFlow</h1>
+      <div className="info-box" style={{ backgroundColor: '#ee8787' }}>          <h3>Stay Engaged with Personalized Workout Plans</h3>
           <p>Our platform empowers trainers to create and assign tailored workout plans to their clients. Keep track of your fitness journey, communicate with your trainer, and manage your workout calendar all in one place. Our features are designed to help you stay committed and reach your fitness goals with ease.</p>
           <button className="learn-more-button">Discover More</button>
         </div>
@@ -30,7 +29,7 @@ function Home() {
         )}
       </div>
       <div className="logo-container">
-        <img src="path-to-your-logo.png" alt="Flatiron FitFlow Logo" />
+      <img src="/flatironfitflow.PNG" alt="Flatiron FitFlow Logo" />
       </div>
     </div>
   );
