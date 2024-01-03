@@ -6,7 +6,7 @@ function ExerciseList() {
   const [exercises, setExercises] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const { token } = useContext(AuthContext); // Assuming you store the token in AuthContext
+  const { token } = useContext(AuthContext); 
 
   useEffect(() => {
     fetchExercises();
@@ -14,17 +14,17 @@ function ExerciseList() {
 
   const fetchExercises = async () => {
     try {
-      console.log('Token Status:', token); // Log the token status
+      console.log('Token Status:', token); 
       const response = await axios.get('/api/exercises', {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token in the request headers
+          Authorization: `Bearer ${token}`, 
         },
       });
-      console.log('Exercise List Response:', response); // Log the response
+      console.log('Exercise List Response:', response); 
       setExercises(response.data);
       setError('');
     } catch (error) {
-      console.error('Error fetching exercises:', error); // Log the error
+      console.error('Error fetching exercises:', error); 
       setError('Failed to fetch exercises');
     } finally {
       setIsLoading(false);
@@ -34,7 +34,7 @@ function ExerciseList() {
   const deleteExercise = (exerciseId) => {
     axios.delete(`/api/exercises/${exerciseId}`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Include the token in the request headers
+        Authorization: `Bearer ${token}`, 
       },
     })
       .then(() => {
