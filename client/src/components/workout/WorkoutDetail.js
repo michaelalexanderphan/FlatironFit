@@ -30,7 +30,8 @@ function WorkoutDetail({ workoutId }) {
       <h2>Workout Details</h2>
       <p>Title: {workoutDetail.title}</p>
       <p>Description: {workoutDetail.description}</p>
-      {/* Render more details as needed */}
+      <p>Exercises: {workoutDetail.exercises}</p>
+      {/* Add back button or link here */}
     </div>
   );
 }
