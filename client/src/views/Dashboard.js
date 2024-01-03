@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Link, Routes, Route, useNavigate, Outlet } from 'react-router-dom';
+import { Routes, Route, useNavigate, Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import WorkoutPlans from '../components/workout/WorkoutPlans';
 import WorkoutDetail from '../components/workout/WorkoutDetail';
@@ -15,9 +15,11 @@ function Dashboard() {
   const navigate = useNavigate();
   const authToken = sessionStorage.getItem('authToken');
 
-  if (!authToken) {
-    navigate('/login');
-  }
+  useEffect(() => {
+    if (!authToken) {
+      navigate('/login');
+    }
+  }, [authToken, navigate]);
 
   return (
     <div>
@@ -29,7 +31,12 @@ function Dashboard() {
           <Route index element={<UserProfile />} />
           <Route path="profile" element={<UserProfile />} />
           <Route path="profile/edit" element={<UserProfileEdit />} />
-          <Route path="workout-plans" element={<WorkoutPlans />} />
+          {user && user.role === 'trainer' && (
+            <Route path="workout-plans/create" element={<WorkoutPlans />} />
+          )}
+          {user && user.role !== 'trainer' && (
+            <Route path="workout-plans" element={<WorkoutPlans />} />
+          )}
           <Route path="workout-detail/:workoutId" element={<WorkoutDetail />} />
           <Route path="exercises" element={<Exercises />} />
           <Route

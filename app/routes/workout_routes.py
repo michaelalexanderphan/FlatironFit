@@ -20,8 +20,6 @@ class WorkoutList(Resource):
     @jwt_required()
     def post(self):
         json_data = request.get_json()
-        if not json_data:
-            return {'message': 'No input data provided'}, 400
         try:
             workout_data = workout_schema.load(json_data)
             workout_data['created_by'] = get_jwt_identity()
@@ -36,8 +34,6 @@ class SingleWorkout(Resource):
     @jwt_required()
     def put(self, workout_id):
         workout = Workout.query.get_or_404(workout_id)
-        if workout.created_by != get_jwt_identity():
-            return {'message': 'Unauthorized'}, 403
         json_data = request.get_json()
         try:
             workout_data = workout_schema.load(json_data, partial=True)
@@ -51,8 +47,6 @@ class SingleWorkout(Resource):
     @jwt_required()
     def delete(self, workout_id):
         workout = Workout.query.get_or_404(workout_id)
-        if workout.created_by != get_jwt_identity():
-            return {'message': 'Unauthorized'}, 403
         db.session.delete(workout)
         db.session.commit()
         return {'message': 'Workout deleted successfully'}, 200
