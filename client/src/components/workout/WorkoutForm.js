@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
+function WorkoutForm({ onWorkoutCreatedOrUpdated, existingWorkout, token }) {
   const [title, setTitle] = useState(existingWorkout?.title || '');
   const [description, setDescription] = useState(existingWorkout?.description || '');
-  const [exercises, setExercises] = useState(existingWorkout?.exercises || [{ name: '', reps: '', sets: '', rest: '' }]);
+  const [exercises, setExercises] = useState(existingWorkout?.exercises || []);
 
   const handleExerciseChange = (index, field, value) => {
     const newExercises = [...exercises];
@@ -13,28 +13,36 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
   };
 
   const addExercise = () => {
-    setExercises([...exercises, { name: '', reps: '', sets: '', rest: '' }]);
+    setExercises([...exercises, { exercise_name: '', reps: '', sets: '', rest_duration: '' }]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !description || exercises.some(ex => !ex.name || ex.reps === '' || !ex.sets || !ex.rest)) {
+    if (!title || !description || exercises.some(ex => !ex.exercise_name || ex.reps === '' || ex.sets === '' || ex.rest_duration === '')) {
       alert('All fields are required, including for each exercise');
       return;
     }
     const workoutData = { title, description, exercises };
-    const endPoint = existingWorkout ? `/api/workouts/${existingWorkout.id}` : '/api/workouts';
-    const method = existingWorkout ? 'put' : 'post';
-    axios[method](endPoint, workoutData)
-      .then(response => {
-        onWorkoutCreated(response.data);
-        setTitle('');
-        setDescription('');
-        setExercises([{ name: '', reps: '', sets: '', rest: '' }]);
-      })
-      .catch(error => {
-        console.error('Error submitting workout:', error);
+    const endpoint = existingWorkout?.id ? `http://localhost:5000/api/workouts/${existingWorkout.id}` : 'http://localhost:5000/api/workouts';
+    const method = existingWorkout?.id ? 'put' : 'post';
+
+    try {
+      const response = await axios({
+        method: method,
+        url: endpoint,
+        data: workoutData,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       });
+      onWorkoutCreatedOrUpdated(response.data);
+      setTitle('');
+      setDescription('');
+      setExercises([]);
+    } catch (error) {
+      console.error('Error submitting workout:', error);
+    }
   };
 
   return (
@@ -45,7 +53,6 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
         <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
         <label htmlFor="description">Description:</label>
         <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
-
         <div>
           <label>Exercises:</label>
           {exercises.map((exercise, index) => (
@@ -53,8 +60,8 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
               <input 
                 type="text" 
                 placeholder="Exercise name"
-                value={exercise.name}
-                onChange={(e) => handleExerciseChange(index, 'name', e.target.value)}
+                value={exercise.exercise_name}
+                onChange={(e) => handleExerciseChange(index, 'exercise_name', e.target.value)}
               />
               <input 
                 type="text" 
@@ -63,7 +70,7 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
                 onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
               />
               <input 
-                type="number" 
+                type="text" 
                 placeholder="Sets"
                 value={exercise.sets}
                 onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)}
@@ -71,14 +78,13 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
               <input 
                 type="text" 
                 placeholder="Rest (e.g., 30s)"
-                value={exercise.rest}
-                onChange={(e) => handleExerciseChange(index, 'rest', e.target.value)}
+                value={exercise.rest_duration}
+                onChange={(e) => handleExerciseChange(index, 'rest_duration', e.target.value)}
               />
             </div>
           ))}
           <button type="button" onClick={addExercise}>Add Exercise</button>
         </div>
-
         <button type="submit">{existingWorkout ? 'Update' : 'Create'} Workout</button>
       </form>
     </div>

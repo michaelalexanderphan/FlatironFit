@@ -38,7 +38,7 @@ class ExerciseResource(Resource):
             for key, value in exercise_data.items():
                 setattr(exercise, key, value)
             db.session.commit()
-            return jsonify(exercise_schema.dump(exercise)), 200
+            return exercise_schema.dump(exercise), 200
         except Exception as err:
             return err.messages, 422
 

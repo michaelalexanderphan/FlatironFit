@@ -2,19 +2,17 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import WorkoutForm from './WorkoutForm';
-import WorkoutDetail from './WorkoutDetail';
 
 function WorkoutPlans() {
   const [userWorkouts, setUserWorkouts] = useState([]);
   const { user, token } = useContext(AuthContext);
   const [editingWorkout, setEditingWorkout] = useState(null);
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState(null);
   const [noWorkoutsMessage, setNoWorkoutsMessage] = useState('');
 
   useEffect(() => {
     const fetchUserWorkouts = async () => {
       try {
-        const response = await axios.get('/api/workouts', {
+        const response = await axios.get('http://localhost:5000/api/workouts', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserWorkouts(response.data);
@@ -33,23 +31,23 @@ function WorkoutPlans() {
     fetchUserWorkouts();
   }, [user, token]);
 
-  const handleWorkoutCreated = (newWorkout) => {
+  const handleWorkoutCreatedOrUpdated = (workout) => {
     setEditingWorkout(null);
-    const updatedWorkouts = editingWorkout
-      ? userWorkouts.map((workout) => (workout.id === newWorkout.id ? newWorkout : workout))
-      : [...userWorkouts, newWorkout];
+    const updatedWorkouts = userWorkouts.map((w) => (w.id === workout.id ? workout : w));
+    if (!updatedWorkouts.find(w => w.id === workout.id)) {
+      updatedWorkouts.push(workout);
+    }
     setUserWorkouts(updatedWorkouts);
   };
 
   const handleEditClick = (workout) => {
     setEditingWorkout(workout);
-    setSelectedWorkoutId(null);
   };
 
   const handleDelete = async (workoutId) => {
     if (window.confirm('Are you sure you want to delete this workout?')) {
       try {
-        await axios.delete(`/api/workouts/${workoutId}`, {
+        await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserWorkouts(userWorkouts.filter((workout) => workout.id !== workoutId));
@@ -59,22 +57,17 @@ function WorkoutPlans() {
     }
   };
 
-  const handleViewDetails = (workoutId) => {
-    setSelectedWorkoutId(workoutId);
-    setEditingWorkout(null);
-  };
-
   return (
     <div>
-      {user?.role === 'trainer' && ( // Conditional rendering for the button
-        <div>
-          <button onClick={() => setEditingWorkout({})}>Create Workout Plan</button>
-        </div>
+      {user && user.role === 'trainer' && (
+        <button onClick={() => setEditingWorkout({})}>Create Workout Plan</button>
       )}
       {editingWorkout ? (
-        <WorkoutForm existingWorkout={editingWorkout} onWorkoutCreated={handleWorkoutCreated} />
-      ) : selectedWorkoutId ? (
-        <WorkoutDetail workoutId={selectedWorkoutId} />
+        <WorkoutForm
+          existingWorkout={editingWorkout}
+          onWorkoutCreatedOrUpdated={handleWorkoutCreatedOrUpdated}
+          token={token}
+        />
       ) : (
         <>
           {noWorkoutsMessage && <p>{noWorkoutsMessage}</p>}
@@ -82,13 +75,12 @@ function WorkoutPlans() {
             <div key={workout.id}>
               <h3>{workout.title}</h3>
               <p>{workout.description}</p>
-              {user?.role === 'trainer' && ( // Conditional rendering for edit and delete buttons
+              {user && user.role === 'trainer' && (
                 <>
                   <button onClick={() => handleEditClick(workout)}>Edit</button>
                   <button onClick={() => handleDelete(workout.id)}>Delete</button>
                 </>
               )}
-              <button onClick={() => handleViewDetails(workout.id)}>View Details</button>
             </div>
           ))}
         </>
