@@ -1,5 +1,5 @@
-from marshmallow import Schema, fields, validate, pre_load, validates, ValidationError, validates_schema
-from werkzeug.security import generate_password_hash
+from marshmallow import Schema, fields, validate, validates, ValidationError
+from app.models.models import User
 from urllib.parse import urlparse
 import re
 
@@ -82,17 +82,6 @@ class WorkoutSchema(Schema):
 
     @validates('client_id')
     def validate_client_id(self, value):
-        # Assuming you have a User model with roles
         user = User.query.get(value)
         if not user or user.role != 'client':
             raise ValidationError('Invalid client ID.')
-
-    @validates('created_at')
-    def validate_created_at(self, value):
-        # Add date validation logic here if needed
-        pass
-
-    @validates('updated_at')
-    def validate_updated_at(self, value):
-        # Add date validation logic here if needed
-        pass
