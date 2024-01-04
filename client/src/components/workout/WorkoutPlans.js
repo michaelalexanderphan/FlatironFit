@@ -13,34 +13,36 @@ function WorkoutPlans() {
   const [clients, setClients] = useState([]);
 
   useEffect(() => {
-    const fetchUserWorkouts = async () => {
-      const response = await axios.get('http://localhost:5000/api/workouts', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUserWorkouts(response.data);
-      setNoWorkoutsMessage(response.data.length === 0 ? (user?.role === 'client' ? 'No workouts currently assigned.' : 'No workouts created. Would you like to create one?') : '');
-    };
-
-    const fetchClients = async () => {
+    if (token) {
+      fetchUserWorkouts();
       if (user?.role === 'trainer') {
-        const response = await axios.get('http://localhost:5000/api/clients', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setClients(response.data);
+        fetchClients();
       }
-    };
-
-    const fetchAvailableExercises = async () => {
-      const response = await axios.get('http://localhost:5000/api/exercises', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAvailableExercises(response.data);
-    };
-
-    fetchUserWorkouts();
-    fetchClients();
-    fetchAvailableExercises();
+      fetchAvailableExercises();
+    }
   }, [user, token]);
+
+  const fetchUserWorkouts = async () => {
+    const response = await axios.get('http://localhost:5000/api/workouts', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setUserWorkouts(response.data);
+    setNoWorkoutsMessage(response.data.length === 0 ? 'No workouts created. Would you like to create one?' : '');
+  };
+
+  const fetchClients = async () => {
+    const response = await axios.get('http://localhost:5000/api/clients', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setClients(response.data);
+  };
+
+  const fetchAvailableExercises = async () => {
+    const response = await axios.get('http://localhost:5000/api/exercises', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setAvailableExercises(response.data);
+  };
 
   const handleWorkoutCreatedOrUpdated = (workout) => {
     setEditingWorkout(null);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, clients, availableExercises }) {
+function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRoles, clients }) {
   const [workoutData, setWorkoutData] = useState({
     title: '',
     description: '',
@@ -81,15 +81,12 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
         />
         {workoutData.exercises.map((exercise, index) => (
           <div key={index}>
-            <select
+            <input
+              type="text"
+              placeholder="Exercise ID"
               value={exercise.exercise_id}
               onChange={(e) => handleInputChange(index, 'exercise_id', e.target.value)}
-            >
-              <option value="">Select Exercise</option>
-              {availableExercises.map((ex) => (
-                <option key={ex.id} value={ex.id}>{ex.name}</option>
-              ))}
-            </select>
+            />
             <input
               type="text"
               placeholder="Reps (e.g., 8-12)"
@@ -112,7 +109,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
           </div>
         ))}
         <button type="button" onClick={addExercise}>Add Exercise</button>
-        {clients && (
+        {userRoles.includes('Client') && clients && ( // Render client-related portion if the user has "Client" role and clients data is available
           <div>
             <label htmlFor="client">Assign to Client:</label>
             <select
