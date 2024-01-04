@@ -8,27 +8,34 @@ function WorkoutPlans() {
   const { user, token } = useContext(AuthContext);
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [noWorkoutsMessage, setNoWorkoutsMessage] = useState('');
+  const [clients, setClients] = useState([]);
 
   useEffect(() => {
     const fetchUserWorkouts = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/workouts', {
+      const response = await axios.get('http://localhost:5000/api/workouts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserWorkouts(response.data);
+      if (response.data.length === 0) {
+        setNoWorkoutsMessage(
+          user?.role === 'client'
+            ? 'No workouts currently assigned.'
+            : 'No workouts created. Would you like to create one?'
+        );
+      }
+    };
+
+    const fetchClients = async () => {
+      if (user?.role === 'trainer') {
+        const response = await axios.get('http://localhost:5000/api/clients', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUserWorkouts(response.data);
-        if (response.data.length === 0) {
-          setNoWorkoutsMessage(
-            user?.role === 'client'
-              ? 'No workouts currently assigned.'
-              : 'No workouts created. Would you like to create one?'
-          );
-        }
-      } catch (error) {
-        console.error('Error fetching user workouts', error);
+        setClients(response.data);
       }
     };
 
     fetchUserWorkouts();
+    fetchClients();
   }, [user, token]);
 
   const handleWorkoutCreatedOrUpdated = (workout) => {
@@ -46,14 +53,10 @@ function WorkoutPlans() {
 
   const handleDelete = async (workoutId) => {
     if (window.confirm('Are you sure you want to delete this workout?')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUserWorkouts(userWorkouts.filter((workout) => workout.id !== workoutId));
-      } catch (error) {
-        console.error('Error deleting workout', error);
-      }
+      await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserWorkouts(userWorkouts.filter((workout) => workout.id !== workoutId));
     }
   };
 
@@ -67,6 +70,7 @@ function WorkoutPlans() {
           existingWorkout={editingWorkout}
           onWorkoutCreatedOrUpdated={handleWorkoutCreatedOrUpdated}
           token={token}
+          clients={clients}
         />
       ) : (
         <>

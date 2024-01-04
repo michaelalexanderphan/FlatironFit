@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function WorkoutForm({ onWorkoutCreatedOrUpdated, existingWorkout, token }) {
+function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, clients }) {
   const [title, setTitle] = useState(existingWorkout?.title || '');
   const [description, setDescription] = useState(existingWorkout?.description || '');
   const [exercises, setExercises] = useState(existingWorkout?.exercises || []);
+  const [selectedClientId, setSelectedClientId] = useState(existingWorkout?.client_id || '');
 
   const handleExerciseChange = (index, field, value) => {
     const newExercises = [...exercises];
@@ -18,31 +19,24 @@ function WorkoutForm({ onWorkoutCreatedOrUpdated, existingWorkout, token }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !description || exercises.some(ex => !ex.exercise_name || ex.reps === '' || ex.sets === '' || ex.rest_duration === '')) {
-      alert('All fields are required, including for each exercise');
-      return;
-    }
-    const workoutData = { title, description, exercises };
+    const workoutData = { title, description, exercises, client_id: selectedClientId };
     const endpoint = existingWorkout?.id ? `http://localhost:5000/api/workouts/${existingWorkout.id}` : 'http://localhost:5000/api/workouts';
     const method = existingWorkout?.id ? 'put' : 'post';
 
-    try {
-      const response = await axios({
-        method: method,
-        url: endpoint,
-        data: workoutData,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      onWorkoutCreatedOrUpdated(response.data);
-      setTitle('');
-      setDescription('');
-      setExercises([]);
-    } catch (error) {
-      console.error('Error submitting workout:', error);
-    }
+    const response = await axios({
+      method,
+      url: endpoint,
+      data: workoutData,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    onWorkoutCreatedOrUpdated(response.data);
+    setTitle('');
+    setDescription('');
+    setExercises([]);
+    setSelectedClientId('');
   };
 
   return (
@@ -54,7 +48,6 @@ function WorkoutForm({ onWorkoutCreatedOrUpdated, existingWorkout, token }) {
         <label htmlFor="description">Description:</label>
         <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
         <div>
-          <label>Exercises:</label>
           {exercises.map((exercise, index) => (
             <div key={index}>
               <input 
@@ -85,6 +78,23 @@ function WorkoutForm({ onWorkoutCreatedOrUpdated, existingWorkout, token }) {
           ))}
           <button type="button" onClick={addExercise}>Add Exercise</button>
         </div>
+        {clients && (
+          <div>
+            <label htmlFor="client">Assign to Client:</label>
+            <select
+              id="client"
+              value={selectedClientId}
+              onChange={(e) => setSelectedClientId(e.target.value)}
+            >
+              <option value="">Select a Client</option>
+              {clients.map(client => (
+                <option key={client.id} value={client.id}>
+                  {client.username}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <button type="submit">{existingWorkout ? 'Update' : 'Create'} Workout</button>
       </form>
     </div>

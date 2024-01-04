@@ -3,12 +3,13 @@ from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.models import Workout, User, Exercise
-from app.schemas import WorkoutSchema
+from app.schemas import WorkoutSchema, UserSchema
 
 workout_bp = Blueprint('workout_bp', __name__)
 api = Api(workout_bp)
 workout_schema = WorkoutSchema()
 workouts_schema = WorkoutSchema(many=True)
+users_schema = UserSchema(many=True)
 
 class WorkoutList(Resource):
     @jwt_required()
@@ -83,6 +84,17 @@ class AssignWorkout(Resource):
         db.session.commit()
         return {'message': f'Workout {workout_id} assigned to client {client_id}'}, 200
 
+class ClientList(Resource):
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        user = User.query.get(current_user)
+        if user.role != 'trainer':
+            return {'message': 'Unauthorized'}, 403
+        clients = User.query.filter_by(role='client').all()
+        return users_schema.dump(clients), 200
+
 api.add_resource(WorkoutList, '/workouts')
 api.add_resource(WorkoutResource, '/workouts/<int:workout_id>')
 api.add_resource(AssignWorkout, '/workouts/<int:workout_id>/assign')
+api.add_resource(ClientList, '/clients')
