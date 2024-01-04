@@ -72,17 +72,38 @@ function WorkoutPlans() {
     fetchTrainerWorkouts();
   };
 
-  const handleWorkoutClick = async workout => {
-    try {
-      const exercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workout.id}/exercises`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSelectedWorkoutDetails({ ...workout, exercises: exercisesResponse.data || [] });
-    } catch (error) {
-      console.error('Error fetching workout exercises', error.response || error);
+  const handleWorkoutClick = async (workout) => {
+    if (!workout || !workout.id) {
+      console.error('Invalid workout ID');
+      return;
+    }
+  
+    // Check if the user is a client and fetch only the workout details
+    if (user && user.role === 'client') {
+      try {
+        const workoutResponse = await axios.get(`http://localhost:5000/api/workouts/${workout.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSelectedWorkoutDetails(workoutResponse.data);
+      } catch (error) {
+        console.error('Error fetching workout details for client', error.response || error);
+      }
+    } else if (user && user.role === 'trainer') {
+      // If the user is a trainer, fetch the workout along with its exercises
+      try {
+        const exercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workout.id}/exercises`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSelectedWorkoutDetails({ ...workout, exercises: exercisesResponse.data || [] });
+      } catch (error) {
+        console.error('Error fetching workout exercises for trainer', error.response || error);
+      }
+    } else {
+      console.error('User role not recognized or user is not authenticated');
     }
   };
-
+  
+  
   const handleEditClick = workout => {
     setEditingWorkout(workout);
     setSelectedWorkoutDetails(null);

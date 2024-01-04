@@ -112,6 +112,26 @@ class WorkoutExercises(Resource):
 
 class UserWorkoutList(Resource):
     @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        user = User.query.get(current_user)
+
+        # Only allow clients to access their workouts
+        if user.role == 'client':
+            assigned_workouts = UserWorkout.query.filter_by(user_id=user.id).all()
+            workouts_data = []
+            for user_workout in assigned_workouts:
+                workout = Workout.query.get(user_workout.workout_id)
+                if workout:
+                    workouts_data.append({
+                        'workout_id': workout.id,
+                        'title': workout.title,
+                        'description': workout.description,
+                        # Include other relevant workout fields
+                    })
+            return workouts_data, 200
+        else:
+            return {'message': 'Unauthorized'}, 403
     def post(self):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
