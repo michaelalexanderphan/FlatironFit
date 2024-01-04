@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 function UserProfileEdit() {
   const authContext = useContext(AuthContext);
   const { user, setUser } = authContext;
-  const token = authContext.token; // Extract token from context
+  const token = authContext.token; 
 
-  const [formData, setFormData] = useState({ // This line was missing
+  const [formData, setFormData] = useState({ 
     username: '',
     email: '',
     contact_info: '',
@@ -43,7 +43,7 @@ function UserProfileEdit() {
       const response = await axios.patch(`/api/users/${user.id}`, formData, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Now 'token' should be defined
+          'Authorization': `Bearer ${token}` 
         }
       });
       setUser(response.data);

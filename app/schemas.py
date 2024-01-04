@@ -1,5 +1,5 @@
-from marshmallow import Schema, fields, validate, pre_load, validates, ValidationError, validates_schema
-from werkzeug.security import generate_password_hash
+from marshmallow import Schema, fields, validate, validates, ValidationError
+from app.models.models import User
 from urllib.parse import urlparse
 import re
 
@@ -54,10 +54,34 @@ class WorkoutSchema(Schema):
     created_by = fields.Int(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    exercise_name = fields.Str()
+    reps = fields.Int()
+    sets = fields.Int()
+    rest_duration = fields.Int()
+    client_id = fields.Int()
 
-    @validates_schema
-    def validate_workout(self, data, **kwargs):
-        if 'title' in data and not data['title'].strip():
-            raise ValidationError('Title must not be blank.', 'title')
-        if 'description' in data and data.get('description') and not data['description'].strip():
-            raise ValidationError('Description must not be blank if provided.', 'description')
+    @validates('exercise_name')
+    def validate_exercise_name(self, value):
+        if not value.strip():
+            raise ValidationError('Exercise name must not be blank.')
+
+    @validates('reps')
+    def validate_reps(self, value):
+        if value <= 0:
+            raise ValidationError('Reps must be a positive integer.')
+
+    @validates('sets')
+    def validate_sets(self, value):
+        if value <= 0:
+            raise ValidationError('Sets must be a positive integer.')
+
+    @validates('rest_duration')
+    def validate_rest_duration(self, value):
+        if value < 0:
+            raise ValidationError('Rest duration must be a non-negative integer.')
+
+    @validates('client_id')
+    def validate_client_id(self, value):
+        user = User.query.get(value)
+        if not user or user.role != 'client':
+            raise ValidationError('Invalid client ID.')

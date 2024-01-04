@@ -1,150 +1,143 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
+import WorkoutForm from './WorkoutForm';
 
 function WorkoutPlans() {
-  const [exercises, setExercises] = useState([]);
-  const [selectedExercises, setSelectedExercises] = useState([]);
-  const [workoutTitle, setWorkoutTitle] = useState('');
-  const [workoutDescription, setWorkoutDescription] = useState('');
-  const [workouts, setWorkouts] = useState([]);
+  const [userWorkouts, setUserWorkouts] = useState([]);
+  const [availableExercises, setAvailableExercises] = useState([]);
+  const { user, token } = useContext(AuthContext);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [selectedWorkoutDetails, setSelectedWorkoutDetails] = useState(null);
   const [clients, setClients] = useState([]);
-  const [assignedClientId, setAssignedClientId] = useState('');
-  const [editingWorkoutId, setEditingWorkoutId] = useState(null);
-  const { token, user } = useContext(AuthContext);
 
   useEffect(() => {
-    console.log(user)
-    const fetchResources = async () => {
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        const workoutsRes = await axios.get('/api/workouts', { headers });
-        setWorkouts(workoutsRes.data);
-        if (user.role === 'trainer') {
-          const exercisesRes = await axios.get('/api/exercises', { headers });
-          const clientsRes = await axios.get('/api/users/clients', { headers });
-          setExercises(exercisesRes.data);
-          setClients(clientsRes.data);
-        }
-      } catch (error) {
-        console.error('Error fetching data', error);
+    if (token) {
+      if (user?.role === 'trainer') {
+        fetchClients();
+        fetchTrainerWorkouts();
+      } else {
+        fetchClientWorkouts();
       }
-    };
-    fetchResources();
-  }, [token, user.role]);
+      fetchAvailableExercises();
+    }
+  }, [user, token]);
 
-  const handleCreateWorkout = async (event) => {
-    event.preventDefault();
+  const fetchTrainerWorkouts = async () => {
     try {
-      const response = await axios.post(
-        '/api/workouts',
-        { title: workoutTitle, description: workoutDescription, exercises: selectedExercises },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setWorkouts([...workouts, response.data]);
-      setWorkoutTitle('');
-      setWorkoutDescription('');
-      setSelectedExercises([]);
+      const response = await axios.get('http://localhost:5000/api/workouts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserWorkouts(response.data);
     } catch (error) {
-      console.error('Error creating workout', error);
+      console.error('Error fetching workouts', error.response || error);
     }
   };
 
-  const handleEditWorkout = async (workoutId) => {
+  const fetchClientWorkouts = async () => {
     try {
-      const response = await axios.put(
-        `/api/workouts/${workoutId}`,
-        { title: workoutTitle, description: workoutDescription },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setWorkouts(workouts.map(workout => workout.id === workoutId ? response.data : workout));
+      const response = await axios.get('http://localhost:5000/api/user_workouts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserWorkouts(response.data);
     } catch (error) {
-      console.error('Error updating workout', error);
+      console.error('Error fetching assigned workouts', error.response || error);
     }
   };
 
-  const handleDeleteWorkout = async (workoutId) => {
+  const fetchClients = async () => {
     try {
-      await axios.delete(`/api/workouts/${workoutId}`, { headers: { Authorization: `Bearer ${token}` } });
-      setWorkouts(workouts.filter(workout => workout.id !== workoutId));
+      const response = await axios.get('http://localhost:5000/api/clients', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setClients(response.data);
     } catch (error) {
-      console.error('Error deleting workout', error);
+      console.error('Error fetching clients', error.response || error);
     }
   };
 
-  const handleAssignWorkout = async (workoutId) => {
+  const fetchAvailableExercises = async () => {
     try {
-      await axios.post(
-        `/api/workouts/${workoutId}/assign`,
-        { clientId: assignedClientId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setAssignedClientId('');
+      const response = await axios.get('http://localhost:5000/api/exercises', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAvailableExercises(response.data);
     } catch (error) {
-      console.error('Error assigning workout', error);
+      console.error('Error fetching exercises', error.response || error);
+    }
+  };
+
+  const handleWorkoutCreatedOrUpdated = workout => {
+    setEditingWorkout(null);
+    fetchTrainerWorkouts();
+  };
+  const handleWorkoutClick = async (workout) => {
+    const workoutId = workout.id || workout.workout_id;
+    console.log('Clicked workout:', workout);
+    console.log('Logged in user ID:', user.id);
+  
+    if (!workoutId) {
+      console.error('Invalid workout ID');
+      return;
+    }
+  
+    try {
+      const exercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}/exercises`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSelectedWorkoutDetails({ ...workout, exercises: exercisesResponse.data || [] });
+    } catch (error) {
+      console.error('Error fetching workout details', error.response || error);
+    }
+  };
+  
+  const handleEditClick = workout => {
+    setEditingWorkout(workout);
+    setSelectedWorkoutDetails(null);
+  };
+
+  const handleDelete = async workoutId => {
+    try {
+      await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchTrainerWorkouts();
+    } catch (error) {
+      console.error('Error deleting workout', error.response || error);
     }
   };
 
   return (
     <div>
-      {user.role === 'trainer' && (
-        <>
-          <form onSubmit={handleCreateWorkout}>
-            <input
-              value={workoutTitle}
-              onChange={e => setWorkoutTitle(e.target.value)}
-              placeholder="Workout Plan Title"
-              required
-            />
-            <textarea
-              value={workoutDescription}
-              onChange={e => setWorkoutDescription(e.target.value)}
-              placeholder="Workout Plan Description"
-              required
-            />
-            <button type="submit">Create Workout Plan</button>
-          </form>
-          {exercises.map(exercise => (
-            <div key={exercise.id}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedExercises.includes(exercise.id)}
-                  onChange={e => {
-                    setSelectedExercises(
-                      e.target.checked
-                        ? [...selectedExercises, exercise.id]
-                        : selectedExercises.filter(id => id !== exercise.id)
-                    );
-                  }}
-                />
-                {exercise.name}
-              </label>
-            </div>
-          ))}
-          {workouts.map(workout => (
-            <div key={workout.id}>
-              <h3>{workout.title}</h3>
-              <p>{workout.description}</p>
-              <button onClick={() => setEditingWorkoutId(workout.id)}>Edit</button>
-              <button onClick={() => handleDeleteWorkout(workout.id)}>Delete</button>
-              <select onChange={e => setAssignedClientId(e.target.value)}>
-                <option value="">Assign to Client</option>
-                {clients.map(client => (
-                  <option key={client.id} value={client.id}>{client.username}</option>
-                ))}
-              </select>
-              <button onClick={() => handleAssignWorkout(workout.id)}>Assign</button>
-            </div>
-          ))}
-        </>
-      )}
-      {user.role === 'client' && (
+      {user && user.role === 'trainer' && <button onClick={() => setEditingWorkout({})}>Create Workout Plan</button>}
+      {editingWorkout ? (
+        <WorkoutForm
+          existingWorkout={editingWorkout}
+          onWorkoutCreatedOrUpdated={handleWorkoutCreatedOrUpdated}
+          token={token}
+          clients={clients}
+          availableExercises={availableExercises}
+        />
+      ) : (
         <div>
-          {workouts.map(workout => (
-            <div key={workout.id}>
+          {userWorkouts.length === 0 && <p>No workouts available.</p>}
+          {userWorkouts.map(workout => (
+            <div key={workout.id} onClick={() => handleWorkoutClick(workout)}>
               <h3>{workout.title}</h3>
               <p>{workout.description}</p>
+              {selectedWorkoutDetails && selectedWorkoutDetails.id === workout.id && (
+                <ul>
+                  {selectedWorkoutDetails.exercises.map(exercise => (
+                    <li key={exercise.id}>{exercise.name} - Reps: {exercise.reps} Sets: {exercise.sets}</li>
+                  ))}
+                </ul>
+              )}
+              {user && user.role === 'trainer' && (
+                <>
+                  <button onClick={() => handleEditClick(workout)}>Edit</button>
+                  <button onClick={() => handleDelete(workout.id)}>Delete</button>
+                </>
+              )}
             </div>
           ))}
         </div>
