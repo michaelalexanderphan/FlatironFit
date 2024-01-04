@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, clients, availableExercises }) {
+function WorkoutForm({
+  existingWorkout,
+  onWorkoutCreatedOrUpdated,
+  token,
+  clients,
+  availableExercises,
+}) {
   const [workoutData, setWorkoutData] = useState({
     title: '',
     description: '',
@@ -68,24 +74,17 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
         },
       });
   
-      // Only attempt to assign a client if a client_id has been selected
-      if (workoutData.client_id) {
-        // Adjust the keys in the payload to match what the server is expecting
-        await axios.post(`http://localhost:5000/api/user_workouts`, {
-          client_id: workoutData.client_id, // Use client_id instead of user_id
-          workout_id: workoutResponse.data.id // Ensure workoutResponse.data.id is present
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          }
-        });
+      // Skip assignment when editing an existing workout
+      if (!existingWorkout) {
+        if (workoutData.client_id) {
+          // Assign the workout to the client
+          await assignWorkoutToClient(workoutResponse.data.id, workoutData.client_id);
+        }
       }
   
       onWorkoutCreatedOrUpdated(workoutResponse.data);
       toast.success('Workout saved successfully!');
   
-      // Reset form if creating a new workout
       if (!existingWorkout) {
         setWorkoutData({
           title: '',
@@ -98,6 +97,45 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
       console.error('Error submitting workout', error.response || error);
       toast.error('Workout already assigned to user');
     }
+  };
+  
+
+  const assignWorkoutToClient = async () => {
+    if (workoutData.client_id) {
+      try {
+        await axios.post(
+          `http://localhost:5000/api/user_workouts`, // Use the correct endpoint
+          {
+            client_id: workoutData.client_id,
+            workout_id: existingWorkout.id // Assuming you need to provide the workout_id
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            }
+          }
+        );
+  
+        toast.success('Workout assigned to client successfully!');
+      } catch (error) {
+        console.error('Error assigning workout to client', error.response || error);
+        toast.error(error.response?.data?.msg || 'This user is already assigned this workout!');
+      }
+    }
+  };
+  
+  
+
+  const renderAssignWorkoutButton = () => {
+    if (workoutData.client_id) {
+      return (
+        <button type="button" onClick={assignWorkoutToClient}>
+          Assign Workout
+        </button>
+      );
+    }
+    return null;
   };
 
   return (
@@ -130,6 +168,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
             <option key={client.id} value={client.id}>{client.username}</option>
           ))}
         </select>
+        {renderAssignWorkoutButton()}
         <button type="submit">{existingWorkout ? 'Update' : 'Create'} Workout</button>
       </form>
     </div>

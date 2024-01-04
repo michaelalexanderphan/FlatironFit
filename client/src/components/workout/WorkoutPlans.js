@@ -11,6 +11,7 @@ function WorkoutPlans() {
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [selectedWorkoutDetails, setSelectedWorkoutDetails] = useState(null);
   const [clients, setClients] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState('');
 
   useEffect(() => {
     if (token) {
@@ -22,7 +23,7 @@ function WorkoutPlans() {
       }
       fetchAvailableExercises();
     }
-  }, [user, token]);
+  }, [user, token, selectedClientId]);
 
   const fetchTrainerWorkouts = async () => {
     try {
@@ -104,8 +105,8 @@ function WorkoutPlans() {
   const createGoogleCalendarEventUrl = (workout) => {
     const title = encodeURIComponent(workout.title);
     const description = encodeURIComponent(workout.description);
-    const startTime = convertToGoogleCalendarDateTime(new Date()); // Replace with actual workout start time
-    const endTime = convertToGoogleCalendarDateTime(new Date()); // Replace with actual workout end time
+    const startTime = convertToGoogleCalendarDateTime(new Date());
+    const endTime = convertToGoogleCalendarDateTime(new Date());
     const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${description}`;
     return calendarUrl;
   };
@@ -176,8 +177,7 @@ function WorkoutPlans() {
         </div>
       )}
     </div>
-  );
-  
+  );  
 }
 
 export default WorkoutPlans;
