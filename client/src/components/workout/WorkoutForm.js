@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, clients, availableExercises }) {
@@ -6,6 +6,15 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
   const [description, setDescription] = useState(existingWorkout?.description || '');
   const [exercises, setExercises] = useState(existingWorkout?.exercises || []);
   const [selectedClientId, setSelectedClientId] = useState(existingWorkout?.client_id || '');
+
+  useEffect(() => {
+    if (existingWorkout) {
+      setTitle(existingWorkout.title || '');
+      setDescription(existingWorkout.description || '');
+      setExercises(existingWorkout.exercises || []);
+      setSelectedClientId(existingWorkout.client_id || '');
+    }
+  }, [existingWorkout]);
 
   const handleExerciseChange = (index, field, value) => {
     const newExercises = [...exercises];
@@ -17,6 +26,11 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
     setExercises([...exercises, { exercise_id: '', reps: '', sets: '', rest_duration: '' }]);
   };
 
+  const removeExercise = index => {
+    const newExercises = exercises.filter((_, i) => i !== index);
+    setExercises(newExercises);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const workoutData = {
@@ -26,7 +40,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
         exercise_id: exercise.exercise_id,
         reps: exercise.reps,
         sets: exercise.sets,
-        rest: exercise.rest_duration
+        rest_duration: exercise.rest_duration
       })),
       client_id: selectedClientId
     };
@@ -44,13 +58,15 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
         },
       });
       onWorkoutCreatedOrUpdated(response.data);
+      if (!existingWorkout) {
+        setTitle('');
+        setDescription('');
+        setExercises([]);
+        setSelectedClientId('');
+      }
     } catch (error) {
       console.error('Error submitting workout', error.response || error);
     }
-    setTitle('');
-    setDescription('');
-    setExercises([]);
-    setSelectedClientId('');
   };
 
   return (
@@ -72,6 +88,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
             <input type="text" placeholder="Reps (e.g., 8-12)" value={exercise.reps} onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)} />
             <input type="text" placeholder="Sets" value={exercise.sets} onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)} />
             <input type="text" placeholder="Rest (e.g., 30s)" value={exercise.rest_duration} onChange={(e) => handleExerciseChange(index, 'rest_duration', e.target.value)} />
+            <button type="button" onClick={() => removeExercise(index)}>Remove Exercise</button>
           </div>
         ))}
         <button type="button" onClick={addExercise}>Add Exercise</button>

@@ -5,10 +5,11 @@ import WorkoutForm from './WorkoutForm';
 
 function WorkoutPlans() {
   const [userWorkouts, setUserWorkouts] = useState([]);
-  const [selectedWorkoutExercises, setSelectedWorkoutExercises] = useState([]);
+  const [availableExercises, setAvailableExercises] = useState([]);
   const { user, token } = useContext(AuthContext);
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [selectedWorkoutDetails, setSelectedWorkoutDetails] = useState(null);
+  const [noWorkoutsMessage, setNoWorkoutsMessage] = useState('');
   const [clients, setClients] = useState([]);
 
   useEffect(() => {
@@ -17,6 +18,7 @@ function WorkoutPlans() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserWorkouts(response.data);
+      setNoWorkoutsMessage(response.data.length === 0 ? (user?.role === 'client' ? 'No workouts currently assigned.' : 'No workouts created. Would you like to create one?') : '');
     };
 
     const fetchClients = async () => {
@@ -28,31 +30,27 @@ function WorkoutPlans() {
       }
     };
 
+    const fetchAvailableExercises = async () => {
+      const response = await axios.get('http://localhost:5000/api/exercises', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAvailableExercises(response.data);
+    };
+
     fetchUserWorkouts();
     fetchClients();
+    fetchAvailableExercises();
   }, [user, token]);
 
-  const handleWorkoutClick = async (workoutId) => {
-    try {
-      const detailsResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSelectedWorkoutDetails(detailsResponse.data);
-
-      const workoutExercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}/exercises`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSelectedWorkoutExercises(workoutExercisesResponse.data);
-    } catch (error) {
-      console.error('An error occurred while fetching workout details or exercises:', error);
-    }
-  };
-
   const handleWorkoutCreatedOrUpdated = (workout) => {
+    setEditingWorkout(null);
     const updatedWorkouts = userWorkouts.map((w) => (w.id === workout.id ? workout : w));
     setUserWorkouts(updatedWorkouts.find(w => w.id === workout.id) ? updatedWorkouts : [...updatedWorkouts, workout]);
     setSelectedWorkoutDetails(null);
-    setEditingWorkout(null);
+  };
+
+  const handleWorkoutClick = (workout) => {
+    setSelectedWorkoutDetails(workout);
   };
 
   const handleEditClick = (workout) => {
@@ -61,43 +59,46 @@ function WorkoutPlans() {
   };
 
   const handleDelete = async (workoutId) => {
-    await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setUserWorkouts(userWorkouts.filter((workout) => workout.id !== workoutId));
+    if (window.confirm('Are you sure you want to delete this workout?')) {
+      await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserWorkouts(userWorkouts.filter((workout) => workout.id !== workoutId));
+    }
   };
 
   return (
     <div>
-      {user && user.role === 'trainer' && <button onClick={() => setEditingWorkout({})}>Create Workout Plan</button>}
+      {user && user.role === 'trainer' && (
+        <button onClick={() => setEditingWorkout({})}>Create Workout Plan</button>
+      )}
       {editingWorkout ? (
         <WorkoutForm
           existingWorkout={editingWorkout}
           onWorkoutCreatedOrUpdated={handleWorkoutCreatedOrUpdated}
           token={token}
           clients={clients}
+          availableExercises={availableExercises}
         />
       ) : (
         <>
+          {noWorkoutsMessage && <p>{noWorkoutsMessage}</p>}
           {userWorkouts.map((workout) => (
-            <div key={workout.id}>
-              <h3 onClick={() => handleWorkoutClick(workout.id)}>{workout.title}</h3>
-              <button onClick={() => handleEditClick(workout)}>Edit</button>
-              <button onClick={() => handleDelete(workout.id)}>Delete</button>
+            <div key={workout.id} onClick={() => handleWorkoutClick(workout)}>
+              <h3>{workout.title}</h3>
+              <p>{workout.description}</p>
+              {user && user.role === 'trainer' && (
+                <>
+                  <button onClick={() => handleEditClick(workout)}>Edit</button>
+                  <button onClick={() => handleDelete(workout.id)}>Delete</button>
+                </>
+              )}
             </div>
           ))}
           {selectedWorkoutDetails && (
             <div>
               <h3>{selectedWorkoutDetails.title}</h3>
-              <p>{selectedWorkoutDetails.description}</p>
-              {selectedWorkoutExercises.map((exercise) => (
-                <div key={exercise.exercise_id}>
-                  <h4>{exercise.name}</h4>
-                  <p>Reps: {exercise.reps}</p>
-                  <p>Sets: {exercise.sets}</p>
-                  <p>Rest: {exercise.rest} seconds</p>
-                </div>
-              ))}
+              {/* Display additional details here */}
             </div>
           )}
         </>

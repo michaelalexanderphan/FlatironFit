@@ -26,7 +26,7 @@ class WorkoutList(Resource):
         db.session.flush()
         for ex_data in json_data.get('exercises', []):
             exercise = Exercise.query.get(ex_data['exercise_id'])
-            workout_exercise = WorkoutExercise(workout_id=workout.id, exercise_id=exercise.id, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest'])
+            workout_exercise = WorkoutExercise(workout_id=workout.id, exercise_id=exercise.id, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])  # Fix 'rest' to 'rest_duration'
             db.session.add(workout_exercise)
         db.session.commit()
         return WorkoutSchema().dump(workout), 201
@@ -48,7 +48,7 @@ class WorkoutResource(Resource):
         WorkoutExercise.query.filter_by(workout_id=workout_id).delete()
         for ex_data in json_data.get('exercises', []):
             exercise = Exercise.query.get(ex_data['exercise_id'])
-            workout_exercise = WorkoutExercise(workout_id=workout_id, exercise_id=exercise.id, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest'])
+            workout_exercise = WorkoutExercise(workout_id=workout_id, exercise_id=exercise.id, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])  # Fix 'rest' to 'rest_duration'
             db.session.add(workout_exercise)
         db.session.commit()
         return WorkoutSchema().dump(workout), 200
@@ -88,13 +88,13 @@ class WorkoutExercises(Resource):
         exercises_data = []
         for we in workout_exercises:
             exercise = Exercise.query.get(we.exercise_id)
-            if exercise:  
+            if exercise:
                 exercises_data.append({
                     'exercise_id': we.exercise_id,
                     'name': exercise.name,
                     'reps': we.reps,
                     'sets': we.sets,
-                    'rest': we.rest
+                    'rest_duration': we.rest  # Fix 'rest' to 'rest_duration'
                 })
             else:
                 exercises_data.append({
@@ -102,10 +102,9 @@ class WorkoutExercises(Resource):
                     'name': 'Unknown Exercise',
                     'reps': we.reps,
                     'sets': we.sets,
-                    'rest': we.rest
+                    'rest_duration': we.rest  # Fix 'rest' to 'rest_duration'
                 })
         return exercises_data, 200
-
 
 api.add_resource(WorkoutList, '/workouts')
 api.add_resource(WorkoutResource, '/workouts/<int:workout_id>')
