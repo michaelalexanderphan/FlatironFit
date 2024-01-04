@@ -128,7 +128,10 @@ function WorkoutPlans() {
               {selectedWorkoutDetails && selectedWorkoutDetails.id === workout.id && (
                 <ul>
                   {selectedWorkoutDetails.exercises.map(exercise => (
-                    <li key={exercise.id}>{exercise.name} - Reps: {exercise.reps} Sets: {exercise.sets}</li>
+                    <li key={exercise.id}>
+                    {exercise.name} - Reps: {exercise.reps} &nbsp;&nbsp; Sets: {exercise.sets} &nbsp;&nbsp; Rest: {exercise.rest_duration} seconds
+                  </li>
+                  
                   ))}
                 </ul>
               )}
