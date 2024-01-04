@@ -6,7 +6,7 @@ function ExerciseList() {
   const [exercises, setExercises] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const { token, user } = useContext(AuthContext); // Assuming you have user information in your context
+  const { token, user } = useContext(AuthContext);
 
   useEffect(() => {
     fetchExercises();
@@ -14,13 +14,11 @@ function ExerciseList() {
 
   const fetchExercises = async () => {
     try {
-      console.log('Token Status:', token);
       const response = await axios.get('/api/exercises', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Exercise List Response:', response);
       setExercises(response.data);
       setError('');
     } catch (error) {
@@ -67,7 +65,6 @@ function ExerciseList() {
                 </a>
               )}
 
-              {/* Conditionally render the delete button based on user's role */}
               {user && user.role === 'trainer' && (
                 <button onClick={() => deleteExercise(exercise.id)}>Delete</button>
               )}
