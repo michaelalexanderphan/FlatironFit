@@ -23,13 +23,17 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem('user');
+    console.log('storedUser', storedUser);
     const storedToken = sessionStorage.getItem('authToken');
+    console.log('storedToken', storedToken);
     if (storedUser && storedToken) {
       const decodedToken = decodeToken(storedToken);
       if (decodedToken) {
         const userData = JSON.parse(storedUser);
         // Ensure the role is set from the decoded token
-        userData.role = decodedToken.role || userData.role || 'client';
+        console.log('decodedToken', decodedToken);
+        console.log('userData', userData);
+        userData.role = decodedToken.role || userData.role;
         setUser(userData);
         setToken(storedToken);
       }
@@ -42,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       // Update the user data with the role from the token
       const updatedUserData = {
         ...userData,
-        role: decodedToken.role || 'client',
+        role: userData.role || decodedToken.role,
       };
       setUser(updatedUserData);
       setToken(authToken);

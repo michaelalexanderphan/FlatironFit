@@ -4,7 +4,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.models import Workout, User, Exercise
 from app.schemas import WorkoutSchema
-from marshmallow import ValidationError
 
 workout_bp = Blueprint('workout_bp', __name__)
 api = Api(workout_bp)
@@ -16,10 +15,9 @@ class WorkoutList(Resource):
     def get(self):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
-        if user.role == 'trainer':
-            workouts = Workout.query.filter_by(created_by=user.id).all()
-        else:
-            workouts = Workout.query.filter_by(client_id=user.id).all()
+        workouts = Workout.query.filter(
+            (Workout.created_by == user.id) | (Workout.client_id == user.id)
+        ).all()
         return workouts_schema.dump(workouts), 200
 
     @jwt_required()
@@ -29,8 +27,8 @@ class WorkoutList(Resource):
         if user.role != 'trainer':
             return {'message': 'Only trainers can create workouts'}, 403
         json_data = request.get_json()
-        exercise_data = json_data.pop('exercises', [])
-        exercise_ids = [ex['id'] for ex in exercise_data]
+        exercise_data = json_data.get('exercises', [])
+        exercise_ids = [ex['id'] for ex in exercise_data if 'id' in ex]
         exercises = Exercise.query.filter(Exercise.id.in_(exercise_ids)).all()
         workout = Workout(
             title=json_data['title'],

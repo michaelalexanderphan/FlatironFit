@@ -10,9 +10,12 @@ function ExerciseList() {
 
   useEffect(() => {
     fetchExercises();
-  }, []);
+  }, [token]);
 
   const fetchExercises = async () => {
+    if (!token) {
+      return;
+    }
     try {
       const response = await axios.get('/api/exercises', {
         headers: {
