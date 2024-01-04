@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRoles, clients, availableExercises }) {
   const [workoutData, setWorkoutData] = useState({
@@ -34,6 +35,14 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRo
     const newWorkoutData = { ...workoutData };
     newWorkoutData.exercises.splice(index, 1);
     setWorkoutData(newWorkoutData);
+  };
+
+  const checkDuplicateWorkout = (exerciseId) => {
+    if (workoutData.exercises.some((exercise) => exercise.exercise_id === exerciseId)) {
+      toast.error('You cannot add the same workout twice.');
+      return true;
+    }
+    return false;
   };
 
   const handleSubmit = async (e) => {
@@ -86,7 +95,12 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRo
           <div key={index}>
             <select
               value={exercise.exercise_id}
-              onChange={(e) => handleInputChange(index, 'exercise_id', e.target.value)}
+              onChange={(e) => {
+                const exerciseId = e.target.value;
+                if (!checkDuplicateWorkout(exerciseId)) {
+                  handleInputChange(index, 'exercise_id', exerciseId);
+                }
+              }}
             >
               <option value="">Select Exercise</option>
               {availableExercises.map((ex) => (
