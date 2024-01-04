@@ -2,11 +2,13 @@ from flask import Blueprint, request
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.models import Workout, User, Exercise, WorkoutExercise
+from app.models.models import Workout, User, Exercise, WorkoutExercise, UserWorkout
 from app.schemas import WorkoutSchema, UserSchema
+from flask_cors import CORS
 
 workout_bp = Blueprint('workout_bp', __name__)
 api = Api(workout_bp)
+CORS(workout_bp)
 
 class WorkoutList(Resource):
     @jwt_required()
@@ -26,7 +28,7 @@ class WorkoutList(Resource):
         db.session.flush()
         for ex_data in json_data.get('exercises', []):
             exercise = Exercise.query.get(ex_data['exercise_id'])
-            workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])  # Fix 'rest' to 'rest_duration'
+            workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])
             db.session.add(workout_exercise)
         db.session.commit()
         return WorkoutSchema().dump(workout), 201
@@ -48,7 +50,7 @@ class WorkoutResource(Resource):
         db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.id).delete()
         for ex_data in json_data.get('exercises', []):
             exercise = Exercise.query.get(ex_data['exercise_id'])
-            workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])  # Fix 'rest' to 'rest_duration'
+            workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])
             db.session.add(workout_exercise)
         db.session.commit()
         return WorkoutSchema().dump(workout), 200
@@ -58,10 +60,7 @@ class WorkoutResource(Resource):
         current_user = get_jwt_identity()
         workout = Workout.query.get_or_404(workout_id)
         
-        # Delete associated WorkoutExercise records
         db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.id).delete()
-
-        # Now delete the Workout instance
         db.session.delete(workout)
         db.session.commit()
         return {'message': 'Workout deleted successfully'}, 200
@@ -99,7 +98,7 @@ class WorkoutExercises(Resource):
                     'name': exercise.name,
                     'reps': we.reps,
                     'sets': we.sets,
-                    'rest_duration': we.rest  # Fix 'rest' to 'rest_duration'
+                    'rest_duration': we.rest
                 })
             else:
                 exercises_data.append({
@@ -107,12 +106,33 @@ class WorkoutExercises(Resource):
                     'name': 'Unknown Exercise',
                     'reps': we.reps,
                     'sets': we.sets,
-                    'rest_duration': we.rest  # Fix 'rest' to 'rest_duration'
+                    'rest_duration': we.rest
                 })
         return exercises_data, 200
+
+class UserWorkoutList(Resource):
+    @jwt_required()
+    def post(self):
+        current_user = get_jwt_identity()
+        user = User.query.get(current_user)
+        if user.role != 'trainer':
+            return {'message': 'Unauthorized'}, 401
+        json_data = request.get_json()
+        client_id = json_data['client_id']
+        workout_id = json_data['workout_id']
+
+        existing_assignment = UserWorkout.query.filter_by(user_id=client_id, workout_id=workout_id).first()
+        if existing_assignment:
+            return {'message': 'Workout already assigned to this user'}, 409
+        
+        user_workout = UserWorkout(user_id=client_id, workout_id=workout_id)
+        db.session.add(user_workout)
+        db.session.commit()
+        return {'message': 'Workout assigned to user successfully'}, 201
 
 api.add_resource(WorkoutList, '/workouts')
 api.add_resource(WorkoutResource, '/workouts/<int:workout_id>')
 api.add_resource(AssignWorkout, '/workouts/<int:workout_id>/assign')
 api.add_resource(ClientList, '/clients')
 api.add_resource(WorkoutExercises, '/workouts/<int:workout_id>/exercises')
+api.add_resource(UserWorkoutList, '/user_workouts')
