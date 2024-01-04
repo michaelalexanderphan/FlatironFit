@@ -11,6 +11,7 @@ function WorkoutPlans() {
   const [selectedWorkoutDetails, setSelectedWorkoutDetails] = useState(null);
   const [noWorkoutsMessage, setNoWorkoutsMessage] = useState('');
   const [clients, setClients] = useState([]);
+  const [workoutExercises, setWorkoutExercises] = useState([]);
 
   useEffect(() => {
     if (token) {
@@ -51,8 +52,12 @@ function WorkoutPlans() {
     setSelectedWorkoutDetails(null);
   };
 
-  const handleWorkoutClick = (workout) => {
+  const handleWorkoutClick = async (workout) => {
     setSelectedWorkoutDetails(workout);
+    const exercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workout.id}/exercises`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setWorkoutExercises(exercisesResponse.data);
   };
 
   const handleEditClick = (workout) => {
@@ -100,7 +105,12 @@ function WorkoutPlans() {
           {selectedWorkoutDetails && (
             <div>
               <h3>{selectedWorkoutDetails.title}</h3>
-              {/* Display additional details here */}
+              <p>{selectedWorkoutDetails.description}</p>
+              <ul>
+                {workoutExercises.map((exercise) => (
+                  <li key={exercise.id}>{exercise.name} - Reps: {exercise.reps} Sets: {exercise.sets}</li>
+                ))}
+              </ul>
             </div>
           )}
         </>
