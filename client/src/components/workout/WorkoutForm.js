@@ -56,7 +56,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
     e.preventDefault();
     const workoutEndpoint = existingWorkout?.id ? `http://localhost:5000/api/workouts/${existingWorkout.id}` : 'http://localhost:5000/api/workouts';
     const workoutMethod = existingWorkout?.id ? 'put' : 'post';
-
+  
     try {
       const workoutResponse = await axios({
         method: workoutMethod,
@@ -67,10 +67,13 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
           'Authorization': `Bearer ${token}`,
         },
       });
+  
+      // Only attempt to assign a client if a client_id has been selected
       if (workoutData.client_id) {
+        // Adjust the keys in the payload to match what the server is expecting
         await axios.post(`http://localhost:5000/api/user_workouts`, {
-          user_id: workoutData.client_id,
-          workout_id: workoutResponse.data.id
+          client_id: workoutData.client_id, // Use client_id instead of user_id
+          workout_id: workoutResponse.data.id // Ensure workoutResponse.data.id is present
         }, {
           headers: {
             'Content-Type': 'application/json',
@@ -78,17 +81,22 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
           }
         });
       }
+  
       onWorkoutCreatedOrUpdated(workoutResponse.data);
+      toast.success('Workout saved successfully!');
+  
+      // Reset form if creating a new workout
       if (!existingWorkout) {
         setWorkoutData({
           title: '',
           description: '',
-          exercises: [{ exercise_id: '', reps: '', sets: '', rest_duration: '' }],
+          exercises: [],
           client_id: '',
         });
       }
     } catch (error) {
       console.error('Error submitting workout', error.response || error);
+      toast.error('Failed to save workout. Please try again.');
     }
   };
 
