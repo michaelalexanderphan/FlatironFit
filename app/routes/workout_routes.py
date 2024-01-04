@@ -47,7 +47,7 @@ class WorkoutResource(Resource):
         json_data = request.get_json()
         workout.title = json_data['title']
         workout.description = json_data['description']
-        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.id).delete()
+        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.workout_id).delete()
         for ex_data in json_data.get('exercises', []):
             exercise = Exercise.query.get(ex_data['exercise_id'])
             workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])
@@ -60,7 +60,7 @@ class WorkoutResource(Resource):
         current_user = get_jwt_identity()
         workout = Workout.query.get_or_404(workout_id)
         
-        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.id).delete()
+        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.workout_id).delete()
         db.session.delete(workout)
         db.session.commit()
         return {'message': 'Workout deleted successfully'}, 200
@@ -83,6 +83,38 @@ class ClientList(Resource):
         user = User.query.get(current_user)
         clients = User.query.filter_by(role='client').all()
         return UserSchema(many=True).dump(clients), 200
+
+class ClientWorkoutExercises(Resource):
+    @jwt_required()
+    def get(self, workout_id):
+        current_user = get_jwt_identity()
+        user = User.query.get(current_user)
+
+        if user.role == 'client':
+            workout = Workout.query.get_or_404(workout_id)
+            workout_exercises = WorkoutExercise.query.filter_by(workout_id=workout.id).all()
+            exercises_data = []
+            for we in workout_exercises:
+                exercise = Exercise.query.get(we.exercise_id)
+                if exercise:
+                    exercises_data.append({
+                        'exercise_id': we.exercise_id,
+                        'name': exercise.name,
+                        'reps': we.reps,
+                        'sets': we.sets,
+                        'rest_duration': we.rest
+                    })
+                else:
+                    exercises_data.append({
+                        'exercise_id': we.exercise_id,
+                        'name': 'Unknown Exercise',
+                        'reps': we.reps,
+                        'sets': we.sets,
+                        'rest_duration': we.rest
+                    })
+            return exercises_data, 200
+        else:
+            return {'message': 'Unauthorized'}, 401
 
 class WorkoutExercises(Resource):
     @jwt_required()
@@ -116,7 +148,6 @@ class UserWorkoutList(Resource):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
 
-        # Only allow clients to access their workouts
         if user.role == 'client':
             assigned_workouts = UserWorkout.query.filter_by(user_id=user.id).all()
             workouts_data = []
@@ -127,11 +158,11 @@ class UserWorkoutList(Resource):
                         'workout_id': workout.id,
                         'title': workout.title,
                         'description': workout.description,
-                        # Include other relevant workout fields
                     })
             return workouts_data, 200
         else:
             return {'message': 'Unauthorized'}, 403
+
     def post(self):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
@@ -156,3 +187,4 @@ api.add_resource(AssignWorkout, '/workouts/<int:workout_id>/assign')
 api.add_resource(ClientList, '/clients')
 api.add_resource(WorkoutExercises, '/workouts/<int:workout_id>/exercises')
 api.add_resource(UserWorkoutList, '/user_workouts')
+api.add_resource(ClientWorkoutExercises, '/client/workouts/<int:workout_id>/exercises')

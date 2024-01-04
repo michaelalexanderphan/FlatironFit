@@ -32,8 +32,8 @@ class User(db.Model):
     bio = db.Column(db.Text)
     secret_code = db.Column(db.String(255))
     user_workouts = db.relationship("UserWorkout", back_populates="user")
-    workouts_created = db.relationship('Workout', foreign_keys='Workout.created_by', backref='creator', lazy='dynamic')
-    workouts_assigned = db.relationship('Workout', foreign_keys='Workout.client_id', backref='client', lazy='dynamic')
+    workouts_created = db.relationship('Workout', foreign_keys='Workout.created_by', back_populates='creator', lazy='dynamic')
+    workouts_assigned = db.relationship('Workout', foreign_keys='Workout.client_id', back_populates='client', lazy='dynamic')
     messages_sent = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy='dynamic')
     messages_received = db.relationship('Message', foreign_keys='Message.receiver_id', backref='receiver', lazy='dynamic')
 
@@ -64,7 +64,10 @@ class Workout(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     workout_users = db.relationship("UserWorkout", back_populates="workout")
     workout_exercises = db.relationship("WorkoutExercise", back_populates="workout")
-    clients = db.relationship('User', secondary='user_workouts', backref=db.backref('workouts', lazy='dynamic'), lazy='dynamic')
+    creator = db.relationship('User', foreign_keys=[created_by], back_populates='workouts_created')
+    client = db.relationship('User', foreign_keys=[client_id], back_populates='workouts_assigned')
+    clients = db.relationship('User', secondary='user_workouts', backref=db.backref('workouts', lazy='dynamic', overlaps="workout_users"), lazy='dynamic')
+
 
 class Exercise(db.Model):
     __tablename__ = 'exercises'

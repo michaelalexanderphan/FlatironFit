@@ -71,38 +71,25 @@ function WorkoutPlans() {
     setEditingWorkout(null);
     fetchTrainerWorkouts();
   };
-
   const handleWorkoutClick = async (workout) => {
-    if (!workout || !workout.id) {
+    const workoutId = workout.id || workout.workout_id;
+    console.log('Clicked workout:', workout);
+    console.log('Logged in user ID:', user.id);
+  
+    if (!workoutId) {
       console.error('Invalid workout ID');
       return;
     }
   
-    // Check if the user is a client and fetch only the workout details
-    if (user && user.role === 'client') {
-      try {
-        const workoutResponse = await axios.get(`http://localhost:5000/api/workouts/${workout.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSelectedWorkoutDetails(workoutResponse.data);
-      } catch (error) {
-        console.error('Error fetching workout details for client', error.response || error);
-      }
-    } else if (user && user.role === 'trainer') {
-      // If the user is a trainer, fetch the workout along with its exercises
-      try {
-        const exercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workout.id}/exercises`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSelectedWorkoutDetails({ ...workout, exercises: exercisesResponse.data || [] });
-      } catch (error) {
-        console.error('Error fetching workout exercises for trainer', error.response || error);
-      }
-    } else {
-      console.error('User role not recognized or user is not authenticated');
+    try {
+      const exercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}/exercises`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSelectedWorkoutDetails({ ...workout, exercises: exercisesResponse.data || [] });
+    } catch (error) {
+      console.error('Error fetching workout details', error.response || error);
     }
   };
-  
   
   const handleEditClick = workout => {
     setEditingWorkout(workout);
