@@ -96,7 +96,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
       }
     } catch (error) {
       console.error('Error submitting workout', error.response || error);
-      toast.error('Failed to save workout. Please try again.');
+      toast.error('Workout already assigned to user');
     }
   };
 
