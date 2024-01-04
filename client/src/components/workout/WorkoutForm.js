@@ -52,14 +52,12 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
     setWorkoutData({ ...workoutData, exercises: newExercises });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const workoutEndpoint = existingWorkout?.id ? `http://localhost:5000/api/workouts/${existingWorkout.id}` : 'http://localhost:5000/api/workouts';
-    const workoutMethod = existingWorkout?.id ? 'put' : 'post';
+  const handleUpdateWorkout = async () => {
+    const workoutEndpoint = `http://localhost:5000/api/workouts/${existingWorkout.id}`;
   
     try {
       const workoutResponse = await axios({
-        method: workoutMethod,
+        method: 'put',
         url: workoutEndpoint,
         data: workoutData,
         headers: {
@@ -68,42 +66,40 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
         },
       });
   
-      // Only attempt to assign a client if a client_id has been selected
-      if (workoutData.client_id) {
-        // Adjust the keys in the payload to match what the server is expecting
+      onWorkoutCreatedOrUpdated(workoutResponse.data);
+      toast.success('Workout updated successfully!');
+    } catch (error) {
+      console.error('Error updating workout', error.response || error);
+      toast.error('Failed to update workout');
+    }
+  };
+
+  const handleAssignToUser = async () => {
+    if (workoutData.client_id) {
+      try {
         await axios.post(`http://localhost:5000/api/user_workouts`, {
-          client_id: workoutData.client_id, // Use client_id instead of user_id
-          workout_id: workoutResponse.data.id // Ensure workoutResponse.data.id is present
+          client_id: workoutData.client_id,
+          workout_id: existingWorkout.id,
         }, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           }
         });
+        toast.success('Workout assigned to user successfully!');
+      } catch (error) {
+        console.error('Error assigning workout to user', error.response || error);
+        toast.error('Failed to assign workout to user');
       }
-  
-      onWorkoutCreatedOrUpdated(workoutResponse.data);
-      toast.success('Workout saved successfully!');
-  
-      // Reset form if creating a new workout
-      if (!existingWorkout) {
-        setWorkoutData({
-          title: '',
-          description: '',
-          exercises: [],
-          client_id: '',
-        });
-      }
-    } catch (error) {
-      console.error('Error submitting workout', error.response || error);
-      toast.error('Workout already assigned to user');
+    } else {
+      toast.error('Please select a client to assign the workout to.');
     }
   };
 
   return (
     <div>
       <h2>{existingWorkout ? 'Edit Workout Plan' : 'Create a New Workout Plan'}</h2>
-      <form onSubmit={handleSubmit}>
+      <form>
         <label htmlFor="title">Title:</label>
         <input id="title" type="text" value={workoutData.title} onChange={(e) => setWorkoutData({ ...workoutData, title: e.target.value })} />
         <label htmlFor="description">Description:</label>
@@ -130,7 +126,14 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
             <option key={client.id} value={client.id}>{client.username}</option>
           ))}
         </select>
-        <button type="submit">{existingWorkout ? 'Update' : 'Create'} Workout</button>
+        {existingWorkout ? (
+          <>
+            <button type="button" onClick={handleUpdateWorkout}>Update Workout</button>
+            <button type="button" onClick={handleAssignToUser}>Assign to User</button>
+          </>
+        ) : (
+          <button type="submit">Create Workout</button>
+        )}
       </form>
     </div>
   );
