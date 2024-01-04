@@ -29,7 +29,9 @@ class MessageList(Resource):
             return {'message': 'No input data provided'}, 400
 
         try:
-            message_data = message_schema.load(json_data)
+            # Load JSON data without validating sender_id
+            message_data = message_schema.load(json_data, partial=('sender_id',))
+            # Manually set sender_id
             message_data['sender_id'] = current_user_id
             new_message = Message(**message_data)
             db.session.add(new_message)
