@@ -2,48 +2,39 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, clients, availableExercises }) {
-  const [title, setTitle] = useState(existingWorkout?.title || '');
-  const [description, setDescription] = useState(existingWorkout?.description || '');
-  const [exercises, setExercises] = useState(existingWorkout?.exercises || []);
-  const [selectedClientId, setSelectedClientId] = useState(existingWorkout?.client_id || '');
+  const [workoutData, setWorkoutData] = useState({
+    title: '',
+    description: '',
+    exercises: [{ exercise_id: '', reps: '', sets: '', rest_duration: '' }],
+    client_id: '',
+  });
 
   useEffect(() => {
     if (existingWorkout) {
-      setTitle(existingWorkout.title || '');
-      setDescription(existingWorkout.description || '');
-      setExercises(existingWorkout.exercises || []);
-      setSelectedClientId(existingWorkout.client_id || '');
+      setWorkoutData(existingWorkout);
     }
   }, [existingWorkout]);
 
-  const handleExerciseChange = (index, field, value) => {
-    const newExercises = [...exercises];
-    newExercises[index][field] = value;
-    setExercises(newExercises);
+  const handleInputChange = (index, field, value) => {
+    const newWorkoutData = { ...workoutData };
+    newWorkoutData.exercises[index][field] = value;
+    setWorkoutData(newWorkoutData);
   };
 
   const addExercise = () => {
-    setExercises([...exercises, { exercise_id: '', reps: '', sets: '', rest_duration: '' }]);
+    const newWorkoutData = { ...workoutData };
+    newWorkoutData.exercises.push({ exercise_id: '', reps: '', sets: '', rest_duration: '' });
+    setWorkoutData(newWorkoutData);
   };
 
-  const removeExercise = index => {
-    const newExercises = exercises.filter((_, i) => i !== index);
-    setExercises(newExercises);
+  const removeExercise = (index) => {
+    const newWorkoutData = { ...workoutData };
+    newWorkoutData.exercises.splice(index, 1);
+    setWorkoutData(newWorkoutData);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const workoutData = {
-      title,
-      description,
-      exercises: exercises.map(exercise => ({
-        exercise_id: exercise.exercise_id,
-        reps: exercise.reps,
-        sets: exercise.sets,
-        rest_duration: exercise.rest_duration
-      })),
-      client_id: selectedClientId
-    };
     const endpoint = existingWorkout?.id ? `http://localhost:5000/api/workouts/${existingWorkout.id}` : 'http://localhost:5000/api/workouts';
     const method = existingWorkout?.id ? 'put' : 'post';
 
@@ -59,10 +50,12 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
       });
       onWorkoutCreatedOrUpdated(response.data);
       if (!existingWorkout) {
-        setTitle('');
-        setDescription('');
-        setExercises([]);
-        setSelectedClientId('');
+        setWorkoutData({
+          title: '',
+          description: '',
+          exercises: [{ exercise_id: '', reps: '', sets: '', rest_duration: '' }],
+          client_id: '',
+        });
       }
     } catch (error) {
       console.error('Error submitting workout', error.response || error);
@@ -74,20 +67,47 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
       <h2>{existingWorkout ? 'Edit Workout Plan' : 'Create a New Workout Plan'}</h2>
       <form onSubmit={handleSubmit}>
         <label htmlFor="title">Title:</label>
-        <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input
+          id="title"
+          type="text"
+          value={workoutData.title}
+          onChange={(e) => handleInputChange(0, 'title', e.target.value)}
+        />
         <label htmlFor="description">Description:</label>
-        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
-        {exercises.map((exercise, index) => (
+        <textarea
+          id="description"
+          value={workoutData.description}
+          onChange={(e) => handleInputChange(0, 'description', e.target.value)}
+        />
+        {workoutData.exercises.map((exercise, index) => (
           <div key={index}>
-            <select value={exercise.exercise_id} onChange={(e) => handleExerciseChange(index, 'exercise_id', e.target.value)}>
+            <select
+              value={exercise.exercise_id}
+              onChange={(e) => handleInputChange(index, 'exercise_id', e.target.value)}
+            >
               <option value="">Select Exercise</option>
               {availableExercises.map((ex) => (
                 <option key={ex.id} value={ex.id}>{ex.name}</option>
               ))}
             </select>
-            <input type="text" placeholder="Reps (e.g., 8-12)" value={exercise.reps} onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)} />
-            <input type="text" placeholder="Sets" value={exercise.sets} onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)} />
-            <input type="text" placeholder="Rest (e.g., 30s)" value={exercise.rest_duration} onChange={(e) => handleExerciseChange(index, 'rest_duration', e.target.value)} />
+            <input
+              type="text"
+              placeholder="Reps (e.g., 8-12)"
+              value={exercise.reps}
+              onChange={(e) => handleInputChange(index, 'reps', e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Sets"
+              value={exercise.sets}
+              onChange={(e) => handleInputChange(index, 'sets', e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Rest (e.g., 30s)"
+              value={exercise.rest_duration}
+              onChange={(e) => handleInputChange(index, 'rest_duration', e.target.value)}
+            />
             <button type="button" onClick={() => removeExercise(index)}>Remove Exercise</button>
           </div>
         ))}
@@ -95,7 +115,11 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, client
         {clients && (
           <div>
             <label htmlFor="client">Assign to Client:</label>
-            <select id="client" value={selectedClientId} onChange={(e) => setSelectedClientId(e.target.value)}>
+            <select
+              id="client"
+              value={workoutData.client_id}
+              onChange={(e) => setWorkoutData({ ...workoutData, client_id: e.target.value })}
+            >
               <option value="">Select a Client</option>
               {clients.map(client => (
                 <option key={client.id} value={client.id}>{client.username}</option>
