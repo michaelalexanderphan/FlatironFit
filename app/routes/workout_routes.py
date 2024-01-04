@@ -35,25 +35,33 @@ class WorkoutList(Resource):
 
 class WorkoutResource(Resource):
     @jwt_required()
-    def get(self, workout_id):
-        current_user = get_jwt_identity()
-        workout = Workout.query.get_or_404(workout_id)
-        return WorkoutSchema().dump(workout), 200
-
-    @jwt_required()
     def put(self, workout_id):
         current_user = get_jwt_identity()
         workout = Workout.query.get_or_404(workout_id)
         json_data = request.get_json()
         workout.title = json_data['title']
         workout.description = json_data['description']
-        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.id).delete()
+        existing_workout_exercises = WorkoutExercise.query.filter_by(workout_id=workout.id).all()
+
+        existing_exercises = {we.exercise_id: we for we in existing_workout_exercises}
 
         for ex_data in json_data.get('exercises', []):
-            exercise = Exercise.query.get(ex_data['exercise_id'])
-            workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])
-            db.session.add(workout_exercise)
-        
+            exercise_id = ex_data['exercise_id']
+            reps = ex_data['reps']
+            sets = ex_data['sets']
+            rest_duration = ex_data['rest_duration']
+
+            if exercise_id in existing_exercises:
+                workout_exercise = existing_exercises[exercise_id]
+                workout_exercise.reps = reps
+                workout_exercise.sets = sets
+                workout_exercise.rest = rest_duration
+            else:
+                exercise = Exercise.query.get(exercise_id)
+                if exercise:
+                    workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=reps, sets=sets, rest=rest_duration)
+                    db.session.add(workout_exercise)
+
         db.session.commit()
         return WorkoutSchema().dump(workout), 200
 
@@ -73,7 +81,15 @@ class AssignWorkout(Resource):
         user = User.query.get(current_user)
         workout = Workout.query.get(workout_id)
         json_data = request.get_json()
-        workout.client_id = json_data.get('client_id')
+        client_id = json_data.get('client_id')
+
+        # Check if the workout is already assigned to the client
+        existing_assignment = UserWorkout.query.filter_by(user_id=client_id, workout_id=workout_id).first()
+        if existing_assignment:
+            return {'message': 'Workout already assigned to this user'}, 409
+
+        # Assign the workout to the client
+        workout.client_id = client_id
         db.session.commit()
         return {'message': f'Workout {workout_id} assigned to client {workout.client_id}'}, 200
 
@@ -163,7 +179,8 @@ class UserWorkoutList(Resource):
             return workouts_data, 200
         else:
             return {'message': 'Unauthorized'}, 403
-
+    
+    @jwt_required()
     def post(self):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
@@ -173,6 +190,7 @@ class UserWorkoutList(Resource):
         client_id = json_data['client_id']
         workout_id = json_data['workout_id']
 
+        # Check if the workout is already assigned to the client
         existing_assignment = UserWorkout.query.filter_by(user_id=client_id, workout_id=workout_id).first()
         if existing_assignment:
             return {'message': 'Workout already assigned to this user'}, 409
