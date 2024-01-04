@@ -28,7 +28,16 @@ function WorkoutPlans() {
       headers: { Authorization: `Bearer ${token}` },
     });
     setUserWorkouts(response.data);
-    setNoWorkoutsMessage(response.data.length === 0 ? 'No workouts created. Would you like to create one?' : '');
+
+    if (response.data.length === 0) {
+      setNoWorkoutsMessage(
+        user?.role === 'trainer'
+          ? 'No workouts created. Would you like to create one?'
+          : 'No workouts currently assigned!'
+      );
+    } else {
+      setNoWorkoutsMessage('');
+    }
   };
 
   const fetchClients = async () => {
@@ -48,7 +57,9 @@ function WorkoutPlans() {
   const handleWorkoutCreatedOrUpdated = (workout) => {
     setEditingWorkout(null);
     const updatedWorkouts = userWorkouts.map((w) => (w.id === workout.id ? workout : w));
-    setUserWorkouts(updatedWorkouts.find(w => w.id === workout.id) ? updatedWorkouts : [...updatedWorkouts, workout]);
+    setUserWorkouts(
+      updatedWorkouts.find((w) => w.id === workout.id) ? updatedWorkouts : [...updatedWorkouts, workout]
+    );
     setSelectedWorkoutDetails(null);
   };
 
@@ -108,7 +119,9 @@ function WorkoutPlans() {
               <p>{selectedWorkoutDetails.description}</p>
               <ul>
                 {workoutExercises.map((exercise) => (
-                  <li key={exercise.id}>{exercise.name} - Reps: {exercise.reps} Sets: {exercise.sets}</li>
+                  <li key={exercise.id}>
+                    {exercise.name} - Reps: {exercise.reps} Sets: {exercise.sets}
+                  </li>
                 ))}
               </ul>
             </div>
