@@ -80,7 +80,34 @@ class ClientList(Resource):
         clients = User.query.filter_by(role='client').all()
         return UserSchema(many=True).dump(clients), 200
 
+class WorkoutExercises(Resource):
+    @jwt_required()
+    def get(self, workout_id):
+        workout = Workout.query.get_or_404(workout_id)
+        workout_exercises = WorkoutExercise.query.filter_by(workout_id=workout.id).all()
+        exercises_data = []
+        for we in workout_exercises:
+            exercise = Exercise.query.get(we.exercise_id)
+            if exercise:  
+                exercises_data.append({
+                    'exercise_id': we.exercise_id,
+                    'name': exercise.name,
+                    'reps': we.reps,
+                    'sets': we.sets,
+                    'rest': we.rest
+                })
+            else:
+                exercises_data.append({
+                    'exercise_id': we.exercise_id,
+                    'name': 'Unknown Exercise',
+                    'reps': we.reps,
+                    'sets': we.sets,
+                    'rest': we.rest
+                })
+        return exercises_data, 200
+
+
 api.add_resource(WorkoutList, '/workouts')
 api.add_resource(WorkoutResource, '/workouts/<int:workout_id>')
 api.add_resource(AssignWorkout, '/workouts/<int:workout_id>/assign')
-api.add_resource(ClientList, '/clients')
+api.add_resource(WorkoutExercises, '/workouts/<int:workout_id>/exercises')
