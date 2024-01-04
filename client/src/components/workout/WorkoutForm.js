@@ -4,7 +4,7 @@ import axios from 'axios';
 function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
   const [title, setTitle] = useState(existingWorkout?.title || '');
   const [description, setDescription] = useState(existingWorkout?.description || '');
-  const [exercises, setExercises] = useState(existingWorkout?.exercises || [{ name: '', reps: '', rest: '' }]);
+  const [exercises, setExercises] = useState(existingWorkout?.exercises || [{ name: '', reps: '', sets: '', rest: '' }]);
 
   const handleExerciseChange = (index, field, value) => {
     const newExercises = [...exercises];
@@ -13,12 +13,12 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
   };
 
   const addExercise = () => {
-    setExercises([...exercises, { name: '', reps: '', rest: '' }]);
+    setExercises([...exercises, { name: '', reps: '', sets: '', rest: '' }]);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !description || exercises.some(ex => !ex.name || !ex.reps || !ex.rest)) {
+    if (!title || !description || exercises.some(ex => !ex.name || ex.reps === '' || !ex.sets || !ex.rest)) {
       alert('All fields are required, including for each exercise');
       return;
     }
@@ -30,7 +30,7 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
         onWorkoutCreated(response.data);
         setTitle('');
         setDescription('');
-        setExercises([{ name: '', reps: '', rest: '' }]);
+        setExercises([{ name: '', reps: '', sets: '', rest: '' }]);
       })
       .catch(error => {
         console.error('Error submitting workout:', error);
@@ -57,10 +57,16 @@ function WorkoutForm({ onWorkoutCreated, existingWorkout }) {
                 onChange={(e) => handleExerciseChange(index, 'name', e.target.value)}
               />
               <input 
-                type="number" 
-                placeholder="Reps"
+                type="text" 
+                placeholder="Reps (e.g., 8-12)"
                 value={exercise.reps}
                 onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
+              />
+              <input 
+                type="number" 
+                placeholder="Sets"
+                value={exercise.sets}
+                onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)}
               />
               <input 
                 type="text" 

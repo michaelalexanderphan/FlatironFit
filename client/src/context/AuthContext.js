@@ -17,13 +17,20 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, authToken) => {
-    setUser({
-      ...userData,
-      role: userData.role 
-    });
-    setToken(authToken);
-    sessionStorage.setItem('user', JSON.stringify(userData));
-    sessionStorage.setItem('authToken', authToken);
+    const decodedToken = decodeToken(authToken);
+    if (decodedToken) {
+      const userWithRole = {
+        ...userData,
+        role: decodedToken.role, // Assuming role is present in the token payload
+      };
+      setUser(userWithRole);
+      setToken(authToken);
+      sessionStorage.setItem('user', JSON.stringify(userWithRole));
+      sessionStorage.setItem('authToken', authToken);
+    } else {
+      // Handle invalid token
+      // You may want to log the user out or display an error message
+    }
   };
 
   const logout = () => {
