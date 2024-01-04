@@ -33,24 +33,19 @@ function WorkoutPlans() {
   }, [user, token]);
 
   const handleWorkoutClick = async (workoutId) => {
-    const detailsResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setSelectedWorkoutDetails(detailsResponse.data);
-
-    const workoutExercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}/workout_exercises`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const exerciseDetailsPromises = workoutExercisesResponse.data.map(exercise =>
-      axios.get(`http://localhost:5000/api/exercises/${exercise.exercise_id}`, {
+    try {
+      const detailsResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}`, {
         headers: { Authorization: `Bearer ${token}` },
-      })
-    );
+      });
+      setSelectedWorkoutDetails(detailsResponse.data);
 
-    const exercisesDetailsResponses = await Promise.all(exerciseDetailsPromises);
-    const exercisesWithDetails = exercisesDetailsResponses.map(response => response.data);
-    setSelectedWorkoutExercises(exercisesWithDetails);
+      const workoutExercisesResponse = await axios.get(`http://localhost:5000/api/workouts/${workoutId}/exercises`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSelectedWorkoutExercises(workoutExercisesResponse.data);
+    } catch (error) {
+      console.error('An error occurred while fetching workout details or exercises:', error);
+    }
   };
 
   const handleWorkoutCreatedOrUpdated = (workout) => {
@@ -96,7 +91,7 @@ function WorkoutPlans() {
               <h3>{selectedWorkoutDetails.title}</h3>
               <p>{selectedWorkoutDetails.description}</p>
               {selectedWorkoutExercises.map((exercise) => (
-                <div key={exercise.id}>
+                <div key={exercise.exercise_id}>
                   <h4>{exercise.name}</h4>
                   <p>Reps: {exercise.reps}</p>
                   <p>Sets: {exercise.sets}</p>

@@ -110,4 +110,5 @@ class WorkoutExercises(Resource):
 api.add_resource(WorkoutList, '/workouts')
 api.add_resource(WorkoutResource, '/workouts/<int:workout_id>')
 api.add_resource(AssignWorkout, '/workouts/<int:workout_id>/assign')
+api.add_resource(ClientList, '/clients')
 api.add_resource(WorkoutExercises, '/workouts/<int:workout_id>/exercises')
