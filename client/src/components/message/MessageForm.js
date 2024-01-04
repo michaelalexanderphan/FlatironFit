@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function MessageForm({ currentUserId, authToken, role, onMessageSent, showMessageForm, users }) {
   const [receiverId, setReceiverId] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('');
+  const [availableUsers, setAvailableUsers] = useState([]);
+
+  useEffect(() => {
+    // Fetch available users when the component mounts
+    const fetchAvailableUsers = async () => {
+      try {
+        const response = await axios.get('/api/users/available', {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        // Filter out the current user from the available users
+        const filteredUsers = response.data.filter((user) => user.id !== currentUserId);
+        setAvailableUsers(filteredUsers);
+      } catch (error) {
+        console.error('Failed to fetch available users:', error);
+      }
+    };
+
+    fetchAvailableUsers();
+  }, [authToken, currentUserId]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -38,7 +57,7 @@ function MessageForm({ currentUserId, authToken, role, onMessageSent, showMessag
           required
         >
           <option value="">Select a user</option>
-          {users.map((user) => (
+          {availableUsers.map((user) => (
             <option key={user.id} value={user.id}>
               {user.username}
             </option>

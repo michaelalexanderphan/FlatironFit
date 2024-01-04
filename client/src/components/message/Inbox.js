@@ -1,30 +1,44 @@
-import React, { useState } from 'react';
-import './messaging.css'; // Import your CSS file
-import MessageForm from './MessageForm';
-import MessageList from './MessageList';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import MessageModal from './MessageModal'; // Import the MessageModal component
 
-function Inbox({ currentUserId, authToken, role }) {
-  const [showMessageForm, setShowMessageForm] = useState(false);
+function Inbox({ currentUserId, authToken }) {
+  const [showMessageList, setShowMessageList] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [error, setError] = useState('');
 
-  const handleSendMessage = () => {
-    setShowMessageForm(false);
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get('/api/messages', {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        setMessages(response.data);
+      } catch (error) {
+        setError('Failed to fetch messages.');
+      }
+    };
+
+    if (showMessageList) {
+      fetchMessages();
+    }
+  }, [authToken, showMessageList]);
+
+  const openMessageList = () => {
+    setShowMessageList(true);
+  };
+
+  const closeMessageList = () => {
+    setShowMessageList(false);
   };
 
   return (
     <div className="inbox-container">
-      <button className="btn-send-message" onClick={() => setShowMessageForm(true)}>Send Message</button>
-      {showMessageForm && (
-        <MessageForm
-          currentUserId={currentUserId}
-          authToken={authToken}
-          role={role}
-          onMessageSent={handleSendMessage}
-        />
-      )}
-      <MessageList
-        currentUserId={currentUserId}
-        authToken={authToken}
-      />
+      {error && <p className="error">{error}</p>}
+      <button className="btn-send-message" onClick={openMessageList}>
+        Open Inbox
+      </button>
+      <MessageModal isOpen={showMessageList} onClose={closeMessageList} messages={messages} />
     </div>
   );
 }
