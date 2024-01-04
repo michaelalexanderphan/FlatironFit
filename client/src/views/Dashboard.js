@@ -21,7 +21,7 @@ function Dashboard() {
 
   return (
     <div>
-      <h1>Dashboard</h1>
+      <h1>Flatiron Fit Flow</h1>
       <h2>Welcome, {user ? user.username : 'Guest'}!</h2>
       <Navbar />
       <Routes>

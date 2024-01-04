@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.models import Message
+from app.models.models import Message, User
 from app.schemas import MessageSchema
 from marshmallow import ValidationError
 
@@ -15,11 +15,24 @@ class MessageList(Resource):
     @jwt_required()
     def get(self):
         current_user_id = get_jwt_identity()
-        messages = Message.query.filter(
-            (Message.sender_id == current_user_id) | 
-            (Message.receiver_id == current_user_id)
-        ).all()
-        return messages_schema.dump(messages), 200
+        messages = db.session.query(
+            Message.id,
+            Message.content,
+            Message.timestamp,
+            User.username.label('sender_username'),
+            User.username.label('receiver_username')
+        ).join(User, User.id == Message.sender_id) \
+         .filter((Message.sender_id == current_user_id) | (Message.receiver_id == current_user_id)) \
+         .all()
+        messages_list = [{
+            'id': message.id,
+            'content': message.content,
+            'timestamp': message.timestamp.isoformat(),  
+            'sender_username': message.sender_username,
+            'receiver_username': message.receiver_username
+        } for message in messages]
+
+        return messages_list, 200
 
     @jwt_required()
     def post(self):
