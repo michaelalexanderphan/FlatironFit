@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRoles, clients }) {
+function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRoles, clients, availableExercises }) {
   const [workoutData, setWorkoutData] = useState({
     title: '',
     description: '',
@@ -11,7 +11,10 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRo
 
   useEffect(() => {
     if (existingWorkout) {
-      setWorkoutData(existingWorkout);
+      setWorkoutData({
+        ...existingWorkout,
+        exercises: existingWorkout.exercises || [{ exercise_id: '', reps: '', sets: '', rest_duration: '' }]
+      });
     }
   }, [existingWorkout]);
 
@@ -71,22 +74,25 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRo
           id="title"
           type="text"
           value={workoutData.title}
-          onChange={(e) => handleInputChange(0, 'title', e.target.value)}
+          onChange={(e) => setWorkoutData({ ...workoutData, title: e.target.value })}
         />
         <label htmlFor="description">Description:</label>
         <textarea
           id="description"
           value={workoutData.description}
-          onChange={(e) => handleInputChange(0, 'description', e.target.value)}
+          onChange={(e) => setWorkoutData({ ...workoutData, description: e.target.value })}
         />
         {workoutData.exercises.map((exercise, index) => (
           <div key={index}>
-            <input
-              type="text"
-              placeholder="Exercise ID"
+            <select
               value={exercise.exercise_id}
               onChange={(e) => handleInputChange(index, 'exercise_id', e.target.value)}
-            />
+            >
+              <option value="">Select Exercise</option>
+              {availableExercises.map((ex) => (
+                <option key={ex.id} value={ex.id}>{ex.name}</option>
+              ))}
+            </select>
             <input
               type="text"
               placeholder="Reps (e.g., 8-12)"
@@ -109,7 +115,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRo
           </div>
         ))}
         <button type="button" onClick={addExercise}>Add Exercise</button>
-        {userRoles.includes('Client') && clients && ( // Render client-related portion if the user has "Client" role and clients data is available
+        {Array.isArray(userRoles) && userRoles.includes('Client') && clients && (
           <div>
             <label htmlFor="client">Assign to Client:</label>
             <select
@@ -127,7 +133,7 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRo
         <button type="submit">{existingWorkout ? 'Update' : 'Create'} Workout</button>
       </form>
     </div>
-  );
+  );  
 }
 
 export default WorkoutForm;
