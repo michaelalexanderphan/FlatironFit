@@ -6,18 +6,39 @@ function WorkoutForm({ existingWorkout, onWorkoutCreatedOrUpdated, token, userRo
   const [workoutData, setWorkoutData] = useState({
     title: '',
     description: '',
-    exercises: [{ exercise_id: '', reps: '', sets: '', rest_duration: '' }],
+    exercises: [],
     client_id: '',
   });
 
   useEffect(() => {
+    const fetchWorkoutExercises = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/workouts/${existingWorkout.id}/exercises`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const fetchedExercises = response.data.map(exercise => ({
+          exercise_id: exercise.exercise_id,
+          reps: exercise.reps,
+          sets: exercise.sets,
+          rest_duration: exercise.rest_duration
+        }));
+        setWorkoutData({ ...existingWorkout, exercises: fetchedExercises });
+      } catch (error) {
+        console.error('Error fetching workout exercises', error.response || error);
+      }
+    };
+
     if (existingWorkout) {
-      setWorkoutData({
-        ...existingWorkout,
-        exercises: existingWorkout.exercises || [{ exercise_id: '', reps: '', sets: '', rest_duration: '' }]
-      });
+      if (existingWorkout.exercises && existingWorkout.exercises.length > 0) {
+        setWorkoutData({
+          ...existingWorkout,
+          exercises: existingWorkout.exercises
+        });
+      } else {
+        fetchWorkoutExercises();
+      }
     }
-  }, [existingWorkout]);
+  }, [existingWorkout, token]);
 
   const handleInputChange = (index, field, value) => {
     const newWorkoutData = { ...workoutData };
