@@ -53,6 +53,7 @@ class Workout(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    client_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # New field to store client ID
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     exercises = db.relationship('Exercise', secondary=WorkoutExercise, lazy='dynamic')

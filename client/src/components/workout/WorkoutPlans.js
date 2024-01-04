@@ -20,8 +20,6 @@ function WorkoutPlans() {
         setUserWorkouts(response.data);
         if (response.data.length === 0) {
           setNoWorkoutsMessage(user?.role === 'client' ? 'No workouts currently assigned.' : 'No workouts created. Would you like to create one?');
-        } else {
-          setNoWorkoutsMessage('');
         }
       } catch (error) {
         console.error('Error fetching user workouts', error);
@@ -71,8 +69,12 @@ function WorkoutPlans() {
             <div key={workout.id}>
               <h3>{workout.title}</h3>
               <p>{workout.description}</p>
-              <button onClick={() => handleEditClick(workout)}>Edit</button>
-              <button onClick={() => handleDelete(workout.id)}>Delete</button>
+              {user?.role === 'trainer' && (
+                <>
+                  <button onClick={() => handleEditClick(workout)}>Edit</button>
+                  <button onClick={() => handleDelete(workout.id)}>Delete</button>
+                </>
+              )}
             </div>
           ))}
         </>

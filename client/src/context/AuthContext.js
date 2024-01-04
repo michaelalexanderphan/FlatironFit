@@ -17,7 +17,10 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, authToken) => {
-    setUser(userData);
+    setUser({
+      ...userData,
+      role: userData.role 
+    });
     setToken(authToken);
     sessionStorage.setItem('user', JSON.stringify(userData));
     sessionStorage.setItem('authToken', authToken);

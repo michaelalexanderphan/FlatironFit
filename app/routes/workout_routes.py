@@ -17,7 +17,7 @@ class WorkoutList(Resource):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
         if user.role == 'trainer':
-            workouts = Workout.query.filter_by(creator_id=user.id).all()
+            workouts = Workout.query.filter_by(created_by=user.id).all()
         elif user.role == 'client':
             workouts = Workout.query.filter_by(client_id=user.id).all()
         return workouts_schema.dump(workouts), 200
@@ -73,7 +73,7 @@ class AssignWorkout(Resource):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
         workout = Workout.query.get_or_404(workout_id)
-        if workout.creator_id != user.id:
+        if user.role != 'trainer' or workout.created_by != user.id:
             return {'message': 'Unauthorized to assign this workout'}, 403
         json_data = request.get_json()
         client_id = json_data.get('client_id')
