@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required
 from app import db
-from app.models.models import Exercise
+from app.models.models import Exercise, WorkoutExercise
 from app.schemas import ExerciseSchema
 
 exercise_bp = Blueprint('exercise_bp', __name__)
@@ -45,6 +45,7 @@ class ExerciseResource(Resource):
     @jwt_required()
     def delete(self, exercise_id):
         exercise = Exercise.query.get_or_404(exercise_id)
+        WorkoutExercise.query.filter_by(exercise_id=exercise_id).delete()
         db.session.delete(exercise)
         db.session.commit()
         return {'message': 'Exercise deleted successfully'}, 200
