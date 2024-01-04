@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
+import ExerciseForm from './ExerciseForm';
+
 
 function ExerciseList() {
   const [exercises, setExercises] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const { token, user } = useContext(AuthContext);
+  const [editingExerciseId, setEditingExerciseId] = useState(null);
 
   useEffect(() => {
     fetchExercises();
@@ -47,17 +50,34 @@ function ExerciseList() {
       });
   };
 
+  const editExercise = (exerciseId) => {
+    setEditingExerciseId(exerciseId);
+  };
+
+  const onExerciseSaved = () => {
+    setEditingExerciseId(null);
+    fetchExercises();
+  };
+
   return (
     <div>
       <h2>Exercise List</h2>
-      {isLoading ? (
-        <p>Loading exercises...</p>
-      ) : error ? (
-        <p>{error}</p>
+      {editingExerciseId ? (
+        <ExerciseForm
+          exerciseId={editingExerciseId}
+          onExerciseSaved={onExerciseSaved}
+          token={token} // Pass the token to ExerciseForm
+        />
       ) : (
-        <ul>
-          {exercises.map((exercise) => (
-            <li key={exercise.id}>
+        <>
+          {isLoading ? (
+            <p>Loading exercises...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : (
+            <ul>
+              {exercises.map((exercise) => (
+                <li key={exercise.id}>
               <h3>{exercise.name}</h3>
               <p>{exercise.description}</p>
               <p>Body Part: {exercise.body_part}</p>
@@ -68,12 +88,17 @@ function ExerciseList() {
                 </a>
               )}
 
-              {user && user.role === 'trainer' && (
-                <button onClick={() => deleteExercise(exercise.id)}>Delete</button>
-              )}
-            </li>
-          ))}
-        </ul>
+                  {user && user.role === 'trainer' && (
+                    <>
+                      <button onClick={() => editExercise(exercise.id)}>Edit</button>
+                      <button onClick={() => deleteExercise(exercise.id)}>Delete</button>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </div>
   );

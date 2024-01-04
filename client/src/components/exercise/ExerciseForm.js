@@ -1,28 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { validateYouTubeUrl } from '../utils/validation';
+import { validateYouTubeUrl } from '../utils/validations';
 
-function ExerciseForm({ exerciseId, onExerciseSaved }) {
+function ExerciseForm({ exerciseId, onExerciseSaved, token }) {
   const [exercise, setExercise] = useState({
     name: '',
     description: '',
     body_part: '',
     difficulty: '',
-    youtube_url: ''
+    youtube_url: '',
   });
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (exerciseId) {
-      axios.get(`/api/exercises/${exerciseId}`)
-        .then(response => {
-          setExercise(response.data);
-        })
-        .catch(error => {
-          console.error('Error fetching exercise details', error);
-        });
+    if (exerciseId && token) {
+      axios.get(`/api/exercises/${exerciseId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(response => {
+        setExercise(response.data); 
+      })
+      .catch(error => {
+        console.error('Error fetching exercise details', error);
+      });
     }
-  }, [exerciseId]);
+  }, [exerciseId, token]);
 
   const handleChange = (e) => {
     setExercise({ ...exercise, [e.target.name]: e.target.value });
@@ -30,23 +32,34 @@ function ExerciseForm({ exerciseId, onExerciseSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     if (!exercise.name || !exercise.difficulty || (exercise.youtube_url && !validateYouTubeUrl(exercise.youtube_url))) {
       setError('Please fill all required fields and enter a valid YouTube URL.');
       return;
     }
-
+  
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      }
+    };
+  
+    const { id, ...exerciseData } = exercise;
+  
     try {
       let response;
       if (exerciseId) {
-        response = await axios.put(`/api/exercises/${exerciseId}`, exercise);
+        response = await axios.put(`/api/exercises/${exerciseId}`, exerciseData, config);
       } else {
-        response = await axios.post('/api/exercises', exercise);
+        response = await axios.post('/api/exercises', exerciseData, config);
       }
       onExerciseSaved(response.data);
     } catch (error) {
       setError('Error saving exercise. Please try again.');
+      console.error('Error submitting exercise:', error);
     }
   };
+
   return (
     <div>
       <h2>{exerciseId ? 'Edit Exercise' : 'Create Exercise'}</h2>
