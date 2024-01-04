@@ -2,83 +2,81 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 
-function WorkoutDetail({ workoutId, onBackClick }) {
-  const { token } = useContext(AuthContext);
-  const [workoutDetail, setWorkoutDetail] = useState(null);
-  const [clients, setClients] = useState([]);
-  const [selectedClientId, setSelectedClientId] = useState('');
+function ExerciseList() {
+  const [exercises, setExercises] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const { token, user } = useContext(AuthContext);
 
   useEffect(() => {
-    const fetchWorkoutDetail = async () => {
-      try {
-        const response = await axios.get(`/api/workouts/${workoutId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setWorkoutDetail(response.data);
-      } catch (err) {
-        setError('Failed to fetch workout details');
-      }
-    };
+    fetchExercises();
+  }, [token]);
 
-    const fetchClients = async () => {
-      try {
-        const response = await axios.get('/api/clients', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setClients(response.data);
-      } catch (err) {
-        setError('Failed to fetch clients');
-      }
-    };
-
-    fetchWorkoutDetail();
-    fetchClients();
-  }, [workoutId, token]);
-
-  const handleAssignToClient = async () => {
-    if (!selectedClientId) {
-      alert("Please select a client to assign the workout to.");
+  const fetchExercises = async () => {
+    if (!token) {
       return;
     }
     try {
-      await axios.post(`/api/workouts/${workoutId}/assign`, { client_id: selectedClientId }, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get('/api/exercises', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      alert("Workout assigned successfully.");
-    } catch (err) {
-      setError('Failed to assign workout');
+      setExercises(response.data);
+      setError('');
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+      setError('Failed to fetch exercises');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!workoutDetail) {
-    return <div>Loading...</div>;
-  }
+  const deleteExercise = (exerciseId) => {
+    axios
+      .delete(`/api/exercises/${exerciseId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(() => {
+        fetchExercises();
+      })
+      .catch((error) => {
+        console.error('Error deleting exercise', error);
+      });
+  };
 
   return (
     <div>
-      <h2>Workout Details</h2>
-      {/* Workout details display */}
-      
-      {/* Client assignment functionality */}
-      <div>
-        <h3>Assign to Client:</h3>
-        <select value={selectedClientId} onChange={e => setSelectedClientId(e.target.value)}>
-          <option value="">Select a Client</option>
-          {clients.map(client => (
-            <option key={client.id} value={client.id}>{client.name}</option>
-          ))}
-        </select>
-        <button onClick={handleAssignToClient}>Assign Workout</button>
-      </div>
+      <h2>Exercise List</h2>
+      {isLoading ? (
+        <p>Loading exercises...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <ul>
+          {exercises.map((exercise) => (
+            <li key={exercise.id}>
+              <h3>{exercise.name}</h3>
+              <p>{exercise.description}</p>
+              <p>Body Part: {exercise.body_part}</p>
+              <p>Difficulty: {exercise.difficulty}</p>
+              {exercise.youtube_url && (
+                <a href={exercise.youtube_url} target="_blank" rel="noopener noreferrer">
+                  Watch on YouTube
+                </a>
+              )}
 
-      <button onClick={onBackClick}>Back to Workouts</button>
+              {user && user.role === 'trainer' && (
+                <button onClick={() => deleteExercise(exercise.id)}>Delete</button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
-export default WorkoutDetail;
+export default ExerciseList;

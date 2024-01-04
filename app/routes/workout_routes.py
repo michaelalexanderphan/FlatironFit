@@ -47,7 +47,7 @@ class WorkoutResource(Resource):
         json_data = request.get_json()
         workout.title = json_data['title']
         workout.description = json_data['description']
-        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.id).delete()
+        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.workout_id).delete()
         for ex_data in json_data.get('exercises', []):
             exercise = Exercise.query.get(ex_data['exercise_id'])
             workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest_duration'])
@@ -60,7 +60,7 @@ class WorkoutResource(Resource):
         current_user = get_jwt_identity()
         workout = Workout.query.get_or_404(workout_id)
         
-        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.id).delete()
+        db.session.query(WorkoutExercise).filter(WorkoutExercise.workout_id == workout.workout_id).delete()
         db.session.delete(workout)
         db.session.commit()
         return {'message': 'Workout deleted successfully'}, 200
