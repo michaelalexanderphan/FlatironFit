@@ -2,9 +2,8 @@ from flask import Blueprint, request
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.models import Workout, User, Exercise
+from app.models.models import Workout, User, Exercise, WorkoutExercise
 from app.schemas import WorkoutSchema, UserSchema
-from marshmallow import ValidationError
 
 workout_bp = Blueprint('workout_bp', __name__)
 api = Api(workout_bp)
@@ -21,40 +20,43 @@ class WorkoutList(Resource):
     def post(self):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
-        if user.role != 'trainer':
-            return {'message': 'Only trainers can create workouts'}, 403
         json_data = request.get_json()
-        exercise_data = json_data.get('exercises', [])
-        exercise_ids = [ex['id'] for ex in exercise_data if 'id' in ex]
-        exercises = Exercise.query.filter(Exercise.id.in_(exercise_ids)).all()
-        workout = Workout(title=json_data['title'], description=json_data['description'], created_by=user.id, exercises=exercises)
+        workout = Workout(title=json_data['title'], description=json_data['description'], created_by=user.id)
         db.session.add(workout)
+        db.session.flush()
+        for ex_data in json_data.get('exercises', []):
+            exercise = Exercise.query.get(ex_data['exercise_id'])
+            workout_exercise = WorkoutExercise(workout_id=workout.id, exercise_id=exercise.id, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest'])
+            db.session.add(workout_exercise)
         db.session.commit()
         return WorkoutSchema().dump(workout), 201
 
 class WorkoutResource(Resource):
     @jwt_required()
+    def get(self, workout_id):
+        current_user = get_jwt_identity()
+        workout = Workout.query.get_or_404(workout_id)
+        return WorkoutSchema().dump(workout), 200
+
+    @jwt_required()
     def put(self, workout_id):
         current_user = get_jwt_identity()
         workout = Workout.query.get_or_404(workout_id)
-        if workout.created_by != current_user:
-            return {'message': 'Unauthorized to modify this workout'}, 403
         json_data = request.get_json()
-        try:
-            workout_data = WorkoutSchema(partial=True).load(json_data)
-            for key, value in workout_data.items():
-                setattr(workout, key, value)
-            db.session.commit()
-            return WorkoutSchema().dump(workout), 200
-        except ValidationError as err:
-            return err.messages, 400
+        workout.title = json_data['title']
+        workout.description = json_data['description']
+        WorkoutExercise.query.filter_by(workout_id=workout_id).delete()
+        for ex_data in json_data.get('exercises', []):
+            exercise = Exercise.query.get(ex_data['exercise_id'])
+            workout_exercise = WorkoutExercise(workout_id=workout_id, exercise_id=exercise.id, reps=ex_data['reps'], sets=ex_data['sets'], rest=ex_data['rest'])
+            db.session.add(workout_exercise)
+        db.session.commit()
+        return WorkoutSchema().dump(workout), 200
 
     @jwt_required()
     def delete(self, workout_id):
         current_user = get_jwt_identity()
         workout = Workout.query.get_or_404(workout_id)
-        if workout.created_by != current_user:
-            return {'message': 'Unauthorized to delete this workout'}, 403
         db.session.delete(workout)
         db.session.commit()
         return {'message': 'Workout deleted successfully'}, 200
@@ -64,27 +66,17 @@ class AssignWorkout(Resource):
     def post(self, workout_id):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
-        if user.role != 'trainer':
-            return {'message': 'Unauthorized'}, 403
         workout = Workout.query.get(workout_id)
-        if not workout or workout.created_by != user.id:
-            return {'message': 'Workout not found or unauthorized'}, 404
         json_data = request.get_json()
-        client_id = json_data.get('client_id')
-        client = User.query.get(client_id)
-        if not client or client.role != 'client':
-            return {'message': 'Invalid client ID'}, 404
-        workout.client_id = client_id
+        workout.client_id = json_data.get('client_id')
         db.session.commit()
-        return {'message': f'Workout {workout_id} assigned to client {client_id}'}, 200
+        return {'message': f'Workout {workout_id} assigned to client {workout.client_id}'}, 200
 
 class ClientList(Resource):
     @jwt_required()
     def get(self):
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
-        if user.role != 'trainer':
-            return {'message': 'Unauthorized'}, 403
         clients = User.query.filter_by(role='client').all()
         return UserSchema(many=True).dump(clients), 200
 

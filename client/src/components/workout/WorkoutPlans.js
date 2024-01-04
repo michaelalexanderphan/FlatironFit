@@ -5,8 +5,10 @@ import WorkoutForm from './WorkoutForm';
 
 function WorkoutPlans() {
   const [userWorkouts, setUserWorkouts] = useState([]);
+  const [availableExercises, setAvailableExercises] = useState([]);
   const { user, token } = useContext(AuthContext);
   const [editingWorkout, setEditingWorkout] = useState(null);
+  const [selectedWorkoutDetails, setSelectedWorkoutDetails] = useState(null);
   const [noWorkoutsMessage, setNoWorkoutsMessage] = useState('');
   const [clients, setClients] = useState([]);
 
@@ -16,13 +18,7 @@ function WorkoutPlans() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserWorkouts(response.data);
-      if (response.data.length === 0) {
-        setNoWorkoutsMessage(
-          user?.role === 'client'
-            ? 'No workouts currently assigned.'
-            : 'No workouts created. Would you like to create one?'
-        );
-      }
+      setNoWorkoutsMessage(response.data.length === 0 ? (user?.role === 'client' ? 'No workouts currently assigned.' : 'No workouts created. Would you like to create one?') : '');
     };
 
     const fetchClients = async () => {
@@ -34,21 +30,32 @@ function WorkoutPlans() {
       }
     };
 
+    const fetchAvailableExercises = async () => {
+      const response = await axios.get('http://localhost:5000/api/exercises', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAvailableExercises(response.data);
+    };
+
     fetchUserWorkouts();
     fetchClients();
+    fetchAvailableExercises();
   }, [user, token]);
 
   const handleWorkoutCreatedOrUpdated = (workout) => {
     setEditingWorkout(null);
     const updatedWorkouts = userWorkouts.map((w) => (w.id === workout.id ? workout : w));
-    if (!updatedWorkouts.find(w => w.id === workout.id)) {
-      updatedWorkouts.push(workout);
-    }
-    setUserWorkouts(updatedWorkouts);
+    setUserWorkouts(updatedWorkouts.find(w => w.id === workout.id) ? updatedWorkouts : [...updatedWorkouts, workout]);
+    setSelectedWorkoutDetails(null);
+  };
+
+  const handleWorkoutClick = (workout) => {
+    setSelectedWorkoutDetails(workout);
   };
 
   const handleEditClick = (workout) => {
     setEditingWorkout(workout);
+    setSelectedWorkoutDetails(null);
   };
 
   const handleDelete = async (workoutId) => {
@@ -71,12 +78,13 @@ function WorkoutPlans() {
           onWorkoutCreatedOrUpdated={handleWorkoutCreatedOrUpdated}
           token={token}
           clients={clients}
+          availableExercises={availableExercises}
         />
       ) : (
         <>
           {noWorkoutsMessage && <p>{noWorkoutsMessage}</p>}
           {userWorkouts.map((workout) => (
-            <div key={workout.id}>
+            <div key={workout.id} onClick={() => handleWorkoutClick(workout)}>
               <h3>{workout.title}</h3>
               <p>{workout.description}</p>
               {user && user.role === 'trainer' && (
@@ -87,6 +95,12 @@ function WorkoutPlans() {
               )}
             </div>
           ))}
+          {selectedWorkoutDetails && (
+            <div>
+              <h3>{selectedWorkoutDetails.title}</h3>
+              {/* Display additional details here */}
+            </div>
+          )}
         </>
       )}
     </div>

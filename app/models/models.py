@@ -6,18 +6,18 @@ from urllib.parse import urlparse
 import bcrypt
 import re
 
-
-# Association table for many-to-many relationship between User and Workout
 UserWorkout = db.Table('user_workouts',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
     db.Column('workout_id', db.Integer, db.ForeignKey('workouts.id'), primary_key=True)
 )
 
-# Association table for many-to-many relationship between Workout and Exercise
-WorkoutExercise = db.Table('workout_exercises',
-    db.Column('workout_id', db.Integer, db.ForeignKey('workouts.id'), primary_key=True),
-    db.Column('exercise_id', db.Integer, db.ForeignKey('exercises.id'), primary_key=True)
-)
+class WorkoutExercise(db.Model):
+    __tablename__ = 'workout_exercises'
+    workout_id = db.Column(db.Integer, db.ForeignKey('workouts.id'), primary_key=True)
+    exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.id'), primary_key=True)
+    reps = db.Column(db.String(10))
+    sets = db.Column(db.Integer)
+    rest = db.Column(db.String(10))
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -41,10 +41,12 @@ class User(db.Model):
 
     @validates('username', 'email')
     def validate(self, key, value):
-        if key == 'username' and not (3 <= len(value) <= 80):
-            raise ValueError('Username must be between 3 and 80 characters')
-        if key == 'email' and not re.match(r"[^@]+@[^@]+\.[^@]+", value):
-            raise ValueError('Invalid email address')
+        if key == 'username':
+            if not (3 <= len(value) <= 80):
+                raise ValueError('Username must be between 3 and 80 characters')
+        if key == 'email':
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", value):
+                raise ValueError('Invalid email address')
         return value
 
 class Workout(db.Model):
@@ -53,19 +55,20 @@ class Workout(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    client_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # New field to store client ID
+    client_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    exercises = db.relationship('Exercise', secondary=WorkoutExercise, lazy='dynamic')
+    exercises = db.relationship('WorkoutExercise', backref='workout', lazy='dynamic')
 
 class Exercise(db.Model):
     __tablename__ = 'exercises'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    body_part = db.Column(db.String(100), nullable=True)  
-    difficulty = db.Column(db.String(50), nullable=True)  
+    body_part = db.Column(db.String(100), nullable=True)
+    difficulty = db.Column(db.String(50), nullable=True)
     youtube_url = db.Column(db.String(255), nullable=True)
+    workout_exercises = db.relationship('WorkoutExercise', backref='exercise', lazy='dynamic')
 
     def is_valid_youtube_url(self):
         parsed_url = urlparse(self.youtube_url)
