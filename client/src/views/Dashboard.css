@@ -4,6 +4,40 @@
     min-height: 100vh;
   }
   
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+  }
+  
+  .navbar-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .left-nav,
+  .center-nav,
+  .right-nav {
+    display: flex;
+    align-items: center;
+  }
+  
+  .left-nav {
+    flex: 1;
+    justify-content: flex-start;
+  }
+  
+  .center-nav {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .right-nav {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  
   .display-4 {
     color: #ff4d4d;
   }
@@ -12,7 +46,6 @@
     color: #f87e7e;
   }
   
-
   .btn-primary {
     background-color: #f04a4a;
     border: none;
@@ -20,7 +53,6 @@
     margin: 10px;
     border-radius: 5px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease;
   }
   
   .btn-primary:hover {
@@ -34,12 +66,11 @@
   }
   
   .font-weight-bold {
-    color: #58a6ff;
+    color: #f04a4a;
   }
   
   .dashboard-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
   }
   
@@ -48,93 +79,29 @@
   }
   
   @media (max-width: 768px) {
-    .dashboard-header {
+    .navbar {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+    }
+  
+    .left-nav, .center-nav, .right-nav {
+      width: 100%;
+      justify-content: center;
+      margin: 5px 0;
+    }
+  
+    .display-4 {
+      margin-bottom: 20px;
     }
   
     .inbox-button {
+      order: 3;
       margin-top: 1rem;
     }
-  }
   
-  .home-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: #0e0a0a;
-  }
-  
-  .welcome-heading {
-    color: #ff4d4d;
-  }
-  
-  .content {
-    flex-basis: 600px;
-  }
-  
-  .logo-container {
-    margin-left: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .logo-container img {
-    max-width: 100%;
-  }
-  
-  .auth-box {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
-  }
-  
-  .auth-link {
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    padding: 10px 20px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .login-btn,
-  .signup-btn {
-    background: #ff4d4d;
-  }
-  
-  .auth-link:hover {
-    background-color: #e60000;
-  }
-  
-  .learn-more-button {
-    background-color: #ffffff;
-    color: #ff4d4d;
-    border: 2px solid white;
-    padding: 10px 20px;
-    border-radius: 4px;
-  }
-  
-  .learn-more-button:hover {
-    background-color: rgb(241, 170, 170);
-    color: #ff4d4d;
-  }
-  
-  @media (max-width: 768px) {
-    .home-container,
-    .content,
-    .logo-container {
-      width: 100%;
-      flex-basis: auto;
-      margin-left: 0;
-    }
-  
-    .logo-container {
-      order: -1;
-      margin-top: 20px;
+    .lead {
+      order: 2;
+      margin-top: 1rem;
     }
   }
   

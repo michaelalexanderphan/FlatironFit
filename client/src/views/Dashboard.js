@@ -85,15 +85,6 @@ function Dashboard() {
     <div className="container-fluid">
       <Navbar />
       <div className="dashboard-header">
-        <div>
-          <h1 className="display-4">Flatiron Fit Flow</h1>
-          <h2 className="lead">Welcome, {user ? user.username : 'Guest'}!</h2>
-        </div>
-        <div>
-          <button className="btn btn-primary inbox-button" onClick={handleOpenInbox}>
-            Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
-          </button>
-        </div>
       </div>
       <Routes>
         <Route path="/" element={<Outlet />} />
@@ -124,13 +115,7 @@ function Dashboard() {
             ))}
           </div>
         } />
-        <Route path="profile/*">
-          {user && (
-            <>
-              <Route index element={<UserProfile />} />
-            </>
-          )}
-        </Route>
+        <Route path="profile/*" element={<UserProfile />} />
       </Routes>
     </div>
   );

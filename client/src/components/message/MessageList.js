@@ -4,7 +4,7 @@ import './messaging.css';
 
 function MessageList({ currentUserId, authToken }) {
   const [conversations, setConversations] = useState({});
-  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [activeConversationId, setActiveConversationId] = useState(null); // Changed variable name for clarity
   const [error, setError] = useState('');
 
   const fetchMessages = async () => {
@@ -42,23 +42,20 @@ function MessageList({ currentUserId, authToken }) {
   };
 
   const selectConversation = (senderId) => {
-    setSelectedConversation(conversations[senderId]);
-    setConversations((prev) => ({
-      ...prev,
-      [senderId]: { ...prev[senderId], unread: false },
-    }));
+    setActiveConversationId(senderId); 
     markMessagesAsRead(conversations[senderId].messages);
   };
 
   const markMessagesAsRead = async (messages) => {
-    for (let message of messages) {
-      if (!message.is_read && message.receiver_id === currentUserId) {
-        await axios.patch(`/api/messages/${message.id}`, {}, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-      }
+    const unreadMessages = messages.filter(m => !m.is_read && m.receiver_id === currentUserId);
+    if (unreadMessages.length > 0) {
+      await axios.patch(`/api/messages/read`, {
+        messageIds: unreadMessages.map(m => m.id)
+      }, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      fetchMessages(); // re-fetch messages to update the state after marking as read
     }
-    fetchMessages();
   };
 
   return (
@@ -66,19 +63,19 @@ function MessageList({ currentUserId, authToken }) {
       {error && <p className="error">{error}</p>}
       <div className="senders-list">
         {Object.keys(conversations).map((senderId) => (
-          <div key={senderId} onClick={() => selectConversation(senderId)} className="sender-name">
+          <div key={senderId} onClick={() => selectConversation(senderId)} className={`sender-name ${conversations[senderId].unread ? 'unread' : ''} ${activeConversationId === senderId ? 'active' : ''}`}>
             {conversations[senderId].sender}
-            {conversations[senderId].unread && <span className="unread-indicator">(unread)</span>}
+            {conversations[senderId].unread && <span className="unread-indicator"> • </span>}
           </div>
         ))}
       </div>
-      {selectedConversation && (
+      {activeConversationId && conversations[activeConversationId] && (
         <div className="conversation-view">
           <div className="conversation-header">
-            {selectedConversation.sender}
+            {conversations[activeConversationId].sender}
           </div>
           <div className="messages">
-            {selectedConversation.messages.map((message) => (
+            {conversations[activeConversationId].messages.map((message) => (
               <div key={message.id} className={`message-item ${!message.is_read ? 'unread-message' : ''}`}>
                 {message.content}
               </div>
