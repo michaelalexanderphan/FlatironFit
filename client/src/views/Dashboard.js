@@ -88,9 +88,6 @@ function Dashboard() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Outlet />} />
-        <Route index element={<UserProfile />} />
-        <Route path="profile" element={<UserProfile />} />
-        <Route path="profile/edit" element={<UserProfileEdit />} />
         <Route path="workout-plans" element={<WorkoutPlans />} />
         <Route path="workout-detail/:workoutId" element={<WorkoutDetail />} />
         <Route path="exercises" element={<Exercises />} />
@@ -118,6 +115,14 @@ function Dashboard() {
             ))}
           </div>
         } />
+        <Route path="profile/*">
+          {user && (
+            <>
+              <Route index element={<UserProfile />} />
+              {/* Remove edit profile */}
+            </>
+          )}
+        </Route>
       </Routes>
       <button className="btn btn-primary" onClick={handleOpenInbox}>
         Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
