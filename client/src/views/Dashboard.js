@@ -8,8 +8,8 @@ import Exercises from '../components/exercise/ExerciseList';
 import Messaging from '../components/message/MessageList';
 import MessageForm from '../components/message/MessageForm';
 import UserProfile from '../components/user/UserProfile';
-import UserProfileEdit from '../components/user/UserProfileEdit';
 import axios from 'axios';
+import './Dashboard.css'; 
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
@@ -83,9 +83,18 @@ function Dashboard() {
 
   return (
     <div className="container-fluid">
-      <h1 className="display-4 mt-4">Flatiron Fit Flow</h1>
-      <h2 className="lead">Welcome, {user ? user.username : 'Guest'}!</h2>
       <Navbar />
+      <div className="dashboard-header">
+        <div>
+          <h1 className="display-4">Flatiron Fit Flow</h1>
+          <h2 className="lead">Welcome, {user ? user.username : 'Guest'}!</h2>
+        </div>
+        <div>
+          <button className="btn btn-primary inbox-button" onClick={handleOpenInbox}>
+            Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
+          </button>
+        </div>
+      </div>
       <Routes>
         <Route path="/" element={<Outlet />} />
         <Route path="workout-plans" element={<WorkoutPlans />} />
@@ -119,14 +128,10 @@ function Dashboard() {
           {user && (
             <>
               <Route index element={<UserProfile />} />
-              {/* Remove edit profile */}
             </>
           )}
         </Route>
       </Routes>
-      <button className="btn btn-primary" onClick={handleOpenInbox}>
-        Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
-      </button>
     </div>
   );
 }
