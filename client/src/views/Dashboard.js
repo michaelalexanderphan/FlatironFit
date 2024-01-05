@@ -23,116 +23,104 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchUnreadMessagesCount = async () => {
-      try {
-        const response = await axios.get('/api/messages/unread/count', {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        setUnreadMessagesCount(response.data.count);
-      } catch (error) {
-        console.error('Failed to fetch unread messages count.');
+      if (authToken) {
+        try {
+          const response = await axios.get('/api/messages/unread/count', {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+          setUnreadMessagesCount(response.data.unread_count);
+        } catch (error) {
+          console.error('Failed to fetch unread messages count.', error);
+        }
       }
     };
-
-    if (authToken) {
-      fetchUnreadMessagesCount();
-    }
+  
+    fetchUnreadMessagesCount();
   }, [authToken]);
 
   useEffect(() => {
     const fetchUsers = async () => {
-      try {
-        let usersResponse;
-
-        if (user?.role === 'trainer') {
-          // Trainers can message all users
-          usersResponse = await axios.get('/api/users/available', {
-            headers: { Authorization: `Bearer ${authToken}` },
-          });
-        } else if (user?.role === 'client') {
-          // Clients can only message trainers
-          usersResponse = await axios.get('/api/users/trainers', {
-            headers: { Authorization: `Bearer ${authToken}` },
-          });
+      if (authToken) {
+        try {
+          let usersResponse;
+          if (user?.role === 'trainer') {
+            usersResponse = await axios.get('/api/users/available', {
+              headers: { Authorization: `Bearer ${authToken}` },
+            });
+          } else if (user?.role === 'client') {
+            usersResponse = await axios.get('/api/users/trainers', {
+              headers: { Authorization: `Bearer ${authToken}` },
+            });
+          }
+          setUsers(usersResponse.data);
+        } catch (error) {
+          console.error('Failed to fetch users.', error);
         }
-
-        setUsers(usersResponse.data);
-      } catch (error) {
-        console.error('Failed to fetch users.');
       }
     };
 
-    if (authToken && showMessageForm) {
+    if (showMessageForm) {
       fetchUsers();
     }
   }, [authToken, showMessageForm, user?.role]);
 
-  const toggleMessageForm = () => {
-    setShowMessageForm(!showMessageForm);
-  };
-
-  const toggleMessageList = () => {
-    setShowMessageList(!showMessageList);
-  };
+  const toggleMessageForm = () => setShowMessageForm(!showMessageForm);
+  const toggleMessageList = () => setShowMessageList(!showMessageList);
 
   const handleOpenInbox = async () => {
-    try {
-      const response = await axios.get('/api/messages', {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      const messages = response.data;
-      setFetchedMessages(messages);
-    } catch (error) {
-      console.error('Failed to fetch messages.', error);
-    }
-
     navigate('/dashboard/messaging');
+    if (authToken) {
+      try {
+        const response = await axios.get('/api/messages', {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        setFetchedMessages(response.data);
+      } catch (error) {
+        console.error('Failed to fetch messages.', error);
+      }
+    }
   };
 
   return (
-    <div>
-      <h1>Flatiron Fit Flow</h1>
-      <h2>Welcome, {user ? user.username : 'Guest'}!</h2>
+    <div className="container-fluid">
+      <h1 className="display-4 mt-4">Flatiron Fit Flow</h1>
+      <h2 className="lead">Welcome, {user ? user.username : 'Guest'}!</h2>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Outlet />}>
-          <Route index element={<UserProfile />} />
-          <Route path="profile" element={<UserProfile />} />
-          <Route path="profile/edit" element={<UserProfileEdit />} />
-          <Route path="workout-plans" element={<WorkoutPlans />} />
-          <Route path="workout-detail/:workoutId" element={<WorkoutDetail />} />
-          <Route path="exercises" element={<Exercises />} />
-          <Route
-            path="messaging"
-            element={
-              <>
-                <button className="btn-show-messages" onClick={toggleMessageForm}>
-                  Send Message
-                </button>
-                {showMessageList && <Messaging currentUserId={user?.id} authToken={authToken} />}
-                {showMessageForm && (
-                  <MessageForm
-                    currentUserId={user?.id}
-                    authToken={authToken}
-                    onClose={toggleMessageForm}
-                    role={user?.role}
-                    users={users}
-                  />
-                )}
-
-                {fetchedMessages.map((message) => (
-                  <div key={message.id}>
-                    <p>From: {message.sender_username}</p>
-                    <p>To: {message.receiver_username}</p>
-                    <p>{message.content}</p>
-                  </div>
-                ))}
-              </>
-            }
-          />
-        </Route>
+        <Route path="/" element={<Outlet />} />
+        <Route index element={<UserProfile />} />
+        <Route path="profile" element={<UserProfile />} />
+        <Route path="profile/edit" element={<UserProfileEdit />} />
+        <Route path="workout-plans" element={<WorkoutPlans />} />
+        <Route path="workout-detail/:workoutId" element={<WorkoutDetail />} />
+        <Route path="exercises" element={<Exercises />} />
+        <Route path="messaging" element={
+          <div>
+            <button className="btn btn-primary mb-3" onClick={toggleMessageForm}>
+              Send Message
+            </button>
+            {showMessageList && <Messaging currentUserId={user?.id} authToken={authToken} />}
+            {showMessageForm && (
+              <MessageForm
+                currentUserId={user?.id}
+                authToken={authToken}
+                onClose={toggleMessageForm}
+                role={user?.role}
+                users={users}
+              />
+            )}
+            {fetchedMessages.map((message) => (
+              <div key={message.id} className="border p-3 mb-3">
+                <p className="font-weight-bold">From: {message.sender_username}</p>
+                <p className="font-weight-bold">To: {message.receiver_username}</p>
+                <p>{message.content}</p>
+              </div>
+            ))}
+          </div>
+        } />
       </Routes>
-      <button className="btn-inbox" onClick={handleOpenInbox}>
-        Inbox {unreadMessagesCount > 0 && <span className="unread-count">{unreadMessagesCount}</span>}
+      <button className="btn btn-primary" onClick={handleOpenInbox}>
+        Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
       </button>
     </div>
   );

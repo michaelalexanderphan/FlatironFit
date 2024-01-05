@@ -1,0 +1,88 @@
+/* Import Bootstrap CSS */
+@import "~bootstrap/dist/css/bootstrap.min.css";
+
+/* Custom Styles */
+
+/* Body Styles */
+body {
+  background-color: #f0f0f0; /* Light gray background */
+  font-family: Arial, sans-serif;
+}
+
+/* Header Styles */
+h1 {
+  color: #e74c3c; /* Red text color */
+  font-size: 24px;
+}
+
+/* Button Styles */
+.button {
+  background-color: #e74c3c; /* Red button background color */
+  color: #fff; /* White text color */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.button:hover {
+  background-color: #c0392b; /* Darker red on hover */
+}
+
+/* Navigation Styles */
+nav {
+  background-color: #e74c3c; /* Red navigation background color */
+  padding: 10px 0;
+}
+
+nav a {
+  color: #fff; /* White text color for navigation links */
+  text-decoration: none;
+  margin-right: 20px;
+}
+
+/* Section Styles */
+.section {
+  margin: 20px;
+  padding: 20px;
+  background-color: #fff; /* White background color for sections */
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Red Text */
+.text-red {
+  color: #e74c3c; /* Red text color */
+}
+
+/* Red Background */
+.bg-red {
+  background-color: #e74c3c; /* Red background color */
+  color: #fff; /* White text color on red background */
+  padding: 10px;
+  border-radius: 4px;
+}
+
+/* Footer Styles */
+footer {
+  background-color: #333; /* Dark gray footer background color */
+  color: #fff; /* White text color in footer */
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* Example Usage */
+.example-button {
+  background-color: #e74c3c;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.example-button:hover {
+  background-color: #c0392b;
+}

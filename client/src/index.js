@@ -1,6 +1,6 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client'; 
-import './styling/index.css';
+import ReactDOM from 'react-dom';
+import './styling/index.css'; 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './context/AuthContext';
