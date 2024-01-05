@@ -83,25 +83,25 @@ function UserProfile() {
   }
 
   return (
-    <div>
-      <h2>User Profile</h2>
+    <div className="user-profile-container">
+      <h2 className="user-profile-heading">User Profile</h2>
       {profileData.id === currentUser.id ? (
-        <>
+        <div className="user-profile-info">
           <p><strong>Username:</strong> {profileData.username}</p>
           <p><strong>Email:</strong> {profileData.email}</p>
           <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
           <p><strong>Bio:</strong> {profileData.bio}</p>
           {!isEditing && <button onClick={handleEditClick}>Edit Profile</button>}
-        </>
+        </div>
       ) : (
-        <>
+        <div className="user-profile-info">
           <p><strong>Username:</strong> {profileData.username}</p>
           <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
           <p><strong>Bio:</strong> {profileData.bio}</p>
-        </>
+        </div>
       )}
       {currentUser.id === profileData.id && isEditing && (
-        <div>
+        <div className="user-profile-edit-form">
           <h2>Edit Profile</h2>
           <form onSubmit={handleSubmit}>
             <input

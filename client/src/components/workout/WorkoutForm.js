@@ -111,7 +111,7 @@ function WorkoutForm({
       }
     } catch (error) {
       console.error('Error submitting workout', error.response || error);
-      toast.error('Workout already assigned to user');
+      toast.error('Please enter valid workout data.');
     }
   };
 

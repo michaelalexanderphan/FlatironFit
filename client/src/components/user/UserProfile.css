@@ -58,3 +58,11 @@
     }
   }
   
+  .user-profile-info:hover,
+  .user-profile-edit-form:hover {
+    background: #1c2128; /* Change the background color on hover */
+    border-color: #394147; /* Change the border color on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Add a box shadow and translateY on hover */
+    transform: translateY(-5px);
+  }
+  

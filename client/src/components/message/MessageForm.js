@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 function MessageForm({ currentUserId, authToken, role, onMessageSent, showMessageForm, users }) {
   const [receiverId, setReceiverId] = useState('');
@@ -38,7 +39,7 @@ function MessageForm({ currentUserId, authToken, role, onMessageSent, showMessag
                 headers: { Authorization: `Bearer ${authToken}` },
             }
         );
-        setStatus('Message sent successfully');
+        toast.success('Message sent successfully');
         setReceiverId('');
         setContent('');
         if (onMessageSent) {
@@ -46,9 +47,9 @@ function MessageForm({ currentUserId, authToken, role, onMessageSent, showMessag
         }
     } catch (error) {
         console.error('Error sending message:', error);
-        setStatus('Failed to send message. Please try again.');
+        toast.error('Failed to send message. Please try again.');
     }
-};
+  };
 
 
 return (
