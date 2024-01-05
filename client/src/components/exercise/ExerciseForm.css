@@ -1,0 +1,72 @@
+.exercise-form-container {
+    padding: 20px;
+    background: #0d1117;
+    min-height: 100vh;
+    color: #c9d1d9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .exercise-form-heading {
+    color: #ff4d4d;
+    margin-bottom: 20px;
+  }
+  
+  .error {
+    color: #e5534b;
+    margin-bottom: 10px;
+  }
+  
+  .exercise-form {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .exercise-input,
+  .exercise-textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 5px;
+    color: #c9d1d9;
+  }
+  
+  .exercise-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .exercise-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #f04a4a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .exercise-button:hover {
+    background-color: #e0979d;
+  }
+  
+  @media (max-width: 768px) {
+    .exercise-form-container {
+      padding: 10px;
+    }
+  
+    .exercise-form {
+      padding: 15px;
+    }
+  }
+  

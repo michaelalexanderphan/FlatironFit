@@ -1,0 +1,67 @@
+.exercise-list-container {
+    padding: 20px;
+    background: #0d1117;
+    min-height: 100vh;
+    color: #c9d1d9;
+  }
+  
+  .exercise-list-heading {
+    color: #ff4d4d;
+    text-align: center;
+  }
+  
+  .exercise-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .exercise-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .exercise-title {
+    color: #f04a4a;
+    font-size: 1.5em;
+  }
+  
+  .exercise-description {
+    color: #c9d1d9;
+    font-size: 1em;
+  }
+  
+  .exercise-detail {
+    color: #8b949e;
+    font-size: 0.9em;
+  }
+  
+  .exercise-link {
+    color: #58a6ff;
+    text-decoration: none;
+  }
+  
+  .exercise-button {
+    background-color: #f04a4a;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  .exercise-button:hover {
+    background-color: #e0979d;
+  }
+  
+  /* Media queries for responsive adjustments */
+  @media (max-width: 768px) {
+    .exercise-list-container {
+      padding: 10px;
+    }
+  }
+  

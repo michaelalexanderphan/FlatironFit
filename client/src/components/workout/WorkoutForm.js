@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import './WorkoutForm.css';
 
 function WorkoutForm({
   existingWorkout,
@@ -151,18 +152,21 @@ function WorkoutForm({
   };
 
   return (
-    <div>
-      <h2>{existingWorkout ? 'Edit Workout Plan' : 'Create a New Workout Plan'}</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="workout-form-container">
+      <h2 className="workout-form-heading">
+        {existingWorkout ? 'Edit Workout Plan' : 'Create a New Workout Plan'}
+      </h2>
+      <form onSubmit={handleSubmit} className="workout-form">
         <label htmlFor="title">Title:</label>
         <input id="title" type="text" value={workoutData.title} onChange={(e) => setWorkoutData({ ...workoutData, title: e.target.value })} />
         <label htmlFor="description">Description:</label>
         <textarea id="description" value={workoutData.description} onChange={(e) => setWorkoutData({ ...workoutData, description: e.target.value })} />
         {workoutData.exercises.map((exercise, index) => (
-          <div key={index}>
+          <div key={index} className="exercise-selection">
             <select
               value={exercise.exercise_id}
               onChange={(e) => handleExerciseSelect(index, e.target.value)}
+              className="exercise-dropdown"
             >
               <option value="">Select Exercise</option>
               {availableExercises.map((ex) => (
@@ -178,10 +182,14 @@ function WorkoutForm({
             <input type="text" placeholder="Reps (e.g., 8-12)" value={exercise.reps} onChange={(e) => handleInputChange(index, 'reps', e.target.value)} />
             <input type="text" placeholder="Sets" value={exercise.sets} onChange={(e) => handleInputChange(index, 'sets', e.target.value)} />
             <input type="text" placeholder="Rest (e.g., 30s)" value={exercise.rest_duration} onChange={(e) => handleInputChange(index, 'rest_duration', e.target.value)} />
-            <button type="button" onClick={() => removeExercise(index)}>Remove Exercise</button>
+            <button type="button" onClick={() => removeExercise(index)} className="remove-exercise-button">
+              Remove Exercise
+            </button>
           </div>
         ))}
-        <button type="button" onClick={addExercise}>Add Exercise</button>
+        <button type="button" onClick={addExercise} className="add-exercise-button">
+          Add Exercise
+        </button>
         <label htmlFor="client">Assign to Client:</label>
         <select id="client" value={workoutData.client_id} onChange={(e) => setWorkoutData({ ...workoutData, client_id: e.target.value })}>
           <option value="">Select a Client</option>
@@ -190,7 +198,9 @@ function WorkoutForm({
           ))}
         </select>
         {renderAssignWorkoutButton()}
-        <button type="submit">{existingWorkout ? 'Update' : 'Create'} Workout</button>
+        <button type="submit" className="submit-workout-button">
+          {existingWorkout ? 'Update' : 'Create'} Workout
+        </button>
       </form>
     </div>
   );

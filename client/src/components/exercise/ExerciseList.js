@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import ExerciseForm from './ExerciseForm';
+import './ExerciseCard.css';
 
 
 function ExerciseList() {
@@ -60,13 +61,13 @@ function ExerciseList() {
   };
 
   return (
-    <div>
-      <h2>Exercise List</h2>
+    <div className="exercise-list-container">
+      <h2 className="exercise-list-heading">Exercise List</h2>
       {editingExerciseId ? (
         <ExerciseForm
           exerciseId={editingExerciseId}
           onExerciseSaved={onExerciseSaved}
-          token={token} // Pass the token to ExerciseForm
+          token={token}
         />
       ) : (
         <>
@@ -77,21 +78,20 @@ function ExerciseList() {
           ) : (
             <ul>
               {exercises.map((exercise) => (
-                <li key={exercise.id}>
-              <h3>{exercise.name}</h3>
-              <p>{exercise.description}</p>
-              <p>Body Part: {exercise.body_part}</p>
-              <p>Difficulty: {exercise.difficulty}</p>
-              {exercise.youtube_url && (
-                <a href={exercise.youtube_url} target="_blank" rel="noopener noreferrer">
-                  Watch on YouTube
-                </a>
-              )}
-
+                <li key={exercise.id} className="exercise-card">
+                  <h3 className="exercise-title">{exercise.name}</h3>
+                  <p className="exercise-description">{exercise.description}</p>
+                  <p className="exercise-detail">Body Part: {exercise.body_part}</p>
+                  <p className="exercise-detail">Difficulty: {exercise.difficulty}</p>
+                  {exercise.youtube_url && (
+                    <a href={exercise.youtube_url} target="_blank" rel="noopener noreferrer" className="exercise-link">
+                      Watch on YouTube
+                    </a>
+                  )}
                   {user && user.role === 'trainer' && (
                     <>
-                      <button onClick={() => editExercise(exercise.id)}>Edit</button>
-                      <button onClick={() => deleteExercise(exercise.id)}>Delete</button>
+                      <button onClick={() => editExercise(exercise.id)} className="exercise-button">Edit</button>
+                      <button onClick={() => deleteExercise(exercise.id)} className="exercise-button">Delete</button>
                     </>
                   )}
                 </li>
@@ -102,6 +102,7 @@ function ExerciseList() {
       )}
     </div>
   );
+  
 }
 
 export default ExerciseList;

@@ -3,23 +3,22 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-  }
-  
-  .left-nav, .center-nav, .right-nav {
-    display: flex;
-    align-items: center;
+    background-color: #0d1117;
   }
   
   .left-nav {
+    display: flex;
     justify-content: flex-start;
   }
   
   .center-nav {
+    display: flex;
     justify-content: center;
     flex-grow: 1;
   }
   
   .right-nav {
+    display: flex;
     justify-content: flex-end;
   }
   
@@ -27,10 +26,12 @@
     color: #c9d1d9;
     padding: 10px 15px;
     text-decoration: none;
+    margin-right: 20px; /* Adjust as needed */
+    transition: color 0.3s ease;
   }
   
   .nav-link:hover {
-    color: #ff4d4d;
+    color: #f54e4e;
   }
   
   .welcome-message {
@@ -40,16 +41,21 @@
   
   .inbox-button, .logout-button {
     padding: 10px 20px;
-    margin-left: 10px;
     background-color: #f04a4a;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
   
   .inbox-button:hover, .logout-button:hover {
     background-color: #e0979d;
+  }
+  
+  .display-4 {
+    color: #ff4d4d;
+    margin: 0;
   }
   
   @media (max-width: 768px) {
@@ -64,8 +70,19 @@
       width: 100%;
     }
   
+    .nav-link {
+      margin-right: 0;
+      padding: 10px 0; /* Full width clickable area for better mobile usability */
+    }
+  
     .welcome-message, .inbox-button, .logout-button {
       margin-top: 10px;
+      width: 100%;
+      text-align: center;
+    }
+  
+    .display-4 {
+      margin-bottom: 20px;
     }
   }
   

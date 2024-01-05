@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { validateYouTubeUrl } from '../utils/validations';
+import './ExerciseForm.css';
 
 function ExerciseForm({ exerciseId, onExerciseSaved, token }) {
   const [exercise, setExercise] = useState({
@@ -61,11 +62,12 @@ function ExerciseForm({ exerciseId, onExerciseSaved, token }) {
   };
 
   return (
-    <div>
-      <h2>{exerciseId ? 'Edit Exercise' : 'Create Exercise'}</h2>
+    <div className="exercise-form-container">
+      <h2 className="exercise-form-heading">{exerciseId ? 'Edit Exercise' : 'Create Exercise'}</h2>
       {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="exercise-form">
         <input
+          className="exercise-input"
           name="name"
           value={exercise.name}
           onChange={handleChange}
@@ -73,30 +75,36 @@ function ExerciseForm({ exerciseId, onExerciseSaved, token }) {
           required
         />
         <textarea
+          className="exercise-textarea"
           name="description"
           value={exercise.description}
           onChange={handleChange}
           placeholder="Description"
         />
         <input
+          className="exercise-input"
           name="body_part"
           value={exercise.body_part}
           onChange={handleChange}
           placeholder="Body Part"
         />
         <input
+          className="exercise-input"
           name="difficulty"
           value={exercise.difficulty}
           onChange={handleChange}
           placeholder="Difficulty"
         />
         <input
+          className="exercise-input"
           name="youtube_url"
           value={exercise.youtube_url}
           onChange={handleChange}
           placeholder="YouTube URL"
         />
-        <button type="submit">{exerciseId ? 'Save Changes' : 'Create Exercise'}</button>
+        <button className="exercise-button" type="submit">
+          {exerciseId ? 'Save Changes' : 'Create Exercise'}
+        </button>
       </form>
     </div>
   );

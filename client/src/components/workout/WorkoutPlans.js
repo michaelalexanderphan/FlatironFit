@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import WorkoutForm from './WorkoutForm';
 import * as XLSX from 'xlsx';
+import './WorkoutCard.css';
 
 function WorkoutPlans() {
   const [userWorkouts, setUserWorkouts] = useState([]);
@@ -136,9 +137,11 @@ function WorkoutPlans() {
   };
 
   return (
-    <div>
+    <div className="workout-plans-container"> {/* Add a container class for styling */}
       {user && user.role === 'trainer' && (
-        <button onClick={() => setEditingWorkout({})}>Create Workout Plan</button>
+        <button className="create-workout-button" onClick={() => setEditingWorkout({})}>
+          Create Workout Plan
+        </button>
       )}
       {editingWorkout ? (
         <WorkoutForm
@@ -149,31 +152,31 @@ function WorkoutPlans() {
           availableExercises={availableExercises}
         />
       ) : (
-        <div>
+        <div className="workout-list">
           {userWorkouts.map((workout) => (
-            <div key={workout.id}>
-              <h3>{workout.title}</h3>
-              <p>{workout.description}</p>
-              <button onClick={() => handleWorkoutClick(workout)}>
+            <div key={workout.id} className="workout-card">
+              <h3 className="workout-title">{workout.title}</h3>
+              <p className="workout-description">{workout.description}</p>
+              <button className="button-primary" onClick={() => handleWorkoutClick(workout)}>
                 Show Workout Details
               </button>
               {selectedWorkoutDetails && selectedWorkoutDetails.id === workout.id && (
-                <div>
-                  <ul>
+                <div className="workout-details">
+                  <ul className="exercise-list">
                     {selectedWorkoutDetails.exercises.map((exercise) => (
-                      <li key={exercise.id}>
+                      <li key={exercise.id} className="exercise-item">
                         {exercise.name} - Reps: {exercise.reps} Sets: {exercise.sets} Rest: {exercise.rest_duration} seconds
                       </li>
                     ))}
                   </ul>
                   {user.role === 'trainer' && (
-                    <div>
-                      <button onClick={() => handleEditClick(workout)}>Edit</button>
-                      <button onClick={() => handleDelete(workout.id)}>Delete</button>
+                    <div className="workout-actions">
+                      <button className="edit-button" onClick={() => handleEditClick(workout)}>Edit</button>
+                      <button className="delete-button" onClick={() => handleDelete(workout.id)}>Delete</button>
                     </div>
                   )}
-                  <button onClick={() => handleExportToExcel(selectedWorkoutDetails)}>Export to Excel</button>
-                  <button onClick={() => handleAddToCalendar(workout)}>Add to Google Calendar</button>
+                  <button className="export-button" onClick={() => handleExportToExcel(selectedWorkoutDetails)}>Export to Excel</button>
+                  <button className="calendar-button" onClick={() => handleAddToCalendar(workout)}>Add to Google Calendar</button>
                 </div>
               )}
             </div>

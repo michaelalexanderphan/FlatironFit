@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import './Navbar.css'; // Ensure this CSS file contains the necessary styles
 
-function Navbar() {
+function Navbar({ onOpenInbox, unreadMessagesCount }) {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -25,8 +24,8 @@ function Navbar() {
       </div>
       <div className="right-nav">
         <span className="welcome-message">Welcome, {user ? user.username : 'Guest'}!</span>
-        <button className="inbox-button" onClick={() => navigate('/dashboard/messaging')}>
-          Inbox (5) {/* Update with dynamic count */}
+        <button className="inbox-button" onClick={onOpenInbox}>
+          Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
         </button>
         <button className="logout-button" onClick={handleLogout}>Logout</button>
       </div>

@@ -83,7 +83,7 @@ function Dashboard() {
 
   return (
     <div className="container-fluid">
-      <Navbar />
+      <Navbar onOpenInbox={handleOpenInbox} unreadMessagesCount={unreadMessagesCount} />
       <div className="dashboard-header">
       </div>
       <Routes>
