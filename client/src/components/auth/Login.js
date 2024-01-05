@@ -37,34 +37,40 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>Login</h2>
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              disabled={isLoading}
-            />
+    <div className="container">
+      <div className="row justify-content-center align-items-center min-vh-100">
+        <div className="col-md-6">
+          <div className="card p-4">
+            <h2 className="text-center mb-4">Login</h2>
+            <form onSubmit={handleLogin}>
+              <div className="mb-3">
+                <label htmlFor="username" className="form-label">Username</label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isLoading}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="form-control"
+                />
+              </div>
+              <button type="submit" disabled={isLoading} className="btn btn-primary">
+                {isLoading ? 'Logging in...' : 'Log In'}
+              </button>
+            </form>
           </div>
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <button type="submit" disabled={isLoading} className="login-button">
-            {isLoading ? 'Logging in...' : 'Log In'}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

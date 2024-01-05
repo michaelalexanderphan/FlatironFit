@@ -63,82 +63,101 @@ function Signup() {
   };
 
   return (
-    <div>
-      <h2>Signup</h2>
-      <form onSubmit={handleSignup}>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          disabled={isLoading}
-        />
-
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={isLoading}
-        />
-
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={isLoading}
-        />
-
-        <label htmlFor="contactInfo">Contact Info</label>
-        <input
-          id="contactInfo"
-          type="text"
-          value={contactInfo}
-          onChange={(e) => setContactInfo(e.target.value)}
-          disabled={isLoading}
-        />
-
-        <label htmlFor="bio">Bio</label>
-        <textarea
-          id="bio"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          disabled={isLoading}
-        />
-
-        <label htmlFor="role">Role</label>
-        <select
-          id="role"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          disabled={isLoading}
-        >
-          <option value="client">Client</option>
-          <option value="trainer">Trainer</option>
-        </select>
-
-        {role === 'trainer' && (
-          <>
-            <label htmlFor="secretCode">Secret Code (for trainers only)</label>
-            <input
-              id="secretCode"
-              type="text"
-              value={secretCode}
-              onChange={(e) => setSecretCode(e.target.value)}
-              disabled={isLoading}
-              placeholder="Enter secret code"
-            />
-          </>
-        )}
-        <button type="submit" disabled={isLoading}>
-          Sign Up
-        </button>
-      </form>
-      {error && <p>{error}</p>}
+    <div className="container">
+      <div className="row justify-content-center align-items-center min-vh-100">
+        <div className="col-md-6">
+          <div className="card p-4">
+            <h2 className="text-center mb-4">Signup</h2>
+            <form onSubmit={handleSignup}>
+              <div className="mb-3">
+                <label htmlFor="username" className="form-label">Username</label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isLoading}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="contactInfo" className="form-label">Contact Info</label>
+                <input
+                  id="contactInfo"
+                  type="text"
+                  value={contactInfo}
+                  onChange={(e) => setContactInfo(e.target.value)}
+                  disabled={isLoading}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="bio" className="form-label">Bio</label>
+                <textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  disabled={isLoading}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="role" className="form-label">Role</label>
+                <select
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  disabled={isLoading}
+                  className="form-select"
+                >
+                  <option value="client">Client</option>
+                  <option value="trainer">Trainer</option>
+                </select>
+              </div>
+              {role === 'trainer' && (
+                <div className="mb-3">
+                  <label htmlFor="secretCode" className="form-label">Secret Code (for trainers only)</label>
+                  <input
+                    id="secretCode"
+                    type="text"
+                    value={secretCode}
+                    onChange={(e) => setSecretCode(e.target.value)}
+                    disabled={isLoading}
+                    className="form-control"
+                    placeholder="Enter secret code"
+                  />
+                </div>
+              )}
+              <button type="submit" disabled={isLoading} className="btn btn-primary">
+                {isLoading ? 'Signing up...' : 'Sign Up'}
+              </button>
+            </form>
+            {error && <p className="text-danger mt-3">{error}</p>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

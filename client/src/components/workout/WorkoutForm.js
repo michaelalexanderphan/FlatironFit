@@ -16,6 +16,9 @@ function WorkoutForm({
     client_id: '',
   });
 
+  // Maintain a list of selected exercise IDs
+  const [selectedExerciseIds, setSelectedExerciseIds] = useState([]);
+
   useEffect(() => {
     const fetchWorkoutExercises = async () => {
       if (existingWorkout && existingWorkout.id) {
@@ -58,6 +61,17 @@ function WorkoutForm({
     setWorkoutData({ ...workoutData, exercises: newExercises });
   };
 
+  // Handle exercise selection
+  const handleExerciseSelect = (index, selectedExerciseId) => {
+    if (selectedExerciseIds.includes(selectedExerciseId)) {
+      toast.error('You have already selected this exercise.');
+    } else {
+      const newSelectedExerciseIds = [...selectedExerciseIds, selectedExerciseId];
+      setSelectedExerciseIds(newSelectedExerciseIds);
+      handleInputChange(index, 'exercise_id', selectedExerciseId);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const workoutEndpoint = existingWorkout?.id ? `http://localhost:5000/api/workouts/${existingWorkout.id}` : 'http://localhost:5000/api/workouts';
@@ -92,13 +106,13 @@ function WorkoutForm({
           exercises: [],
           client_id: '',
         });
+        setSelectedExerciseIds([]); // Clear selected exercise IDs
       }
     } catch (error) {
       console.error('Error submitting workout', error.response || error);
       toast.error('Workout already assigned to user');
     }
   };
-  
 
   const assignWorkoutToClient = async () => {
     if (workoutData.client_id) {
@@ -124,8 +138,6 @@ function WorkoutForm({
       }
     }
   };
-  
-  
 
   const renderAssignWorkoutButton = () => {
     if (workoutData.client_id) {
@@ -148,10 +160,19 @@ function WorkoutForm({
         <textarea id="description" value={workoutData.description} onChange={(e) => setWorkoutData({ ...workoutData, description: e.target.value })} />
         {workoutData.exercises.map((exercise, index) => (
           <div key={index}>
-            <select value={exercise.exercise_id} onChange={(e) => handleInputChange(index, 'exercise_id', e.target.value)}>
+            <select
+              value={exercise.exercise_id}
+              onChange={(e) => handleExerciseSelect(index, e.target.value)}
+            >
               <option value="">Select Exercise</option>
               {availableExercises.map((ex) => (
-                <option key={ex.id} value={ex.id}>{ex.name}</option>
+                <option
+                  key={ex.id}
+                  value={ex.id}
+                  disabled={selectedExerciseIds.includes(ex.id)}
+                >
+                  {ex.name}
+                </option>
               ))}
             </select>
             <input type="text" placeholder="Reps (e.g., 8-12)" value={exercise.reps} onChange={(e) => handleInputChange(index, 'reps', e.target.value)} />

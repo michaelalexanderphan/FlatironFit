@@ -166,8 +166,12 @@ function WorkoutPlans() {
                       </li>
                     ))}
                   </ul>
-                  <button onClick={() => handleEditClick(workout)}>Edit</button>
-                  <button onClick={() => handleDelete(workout.id)}>Delete</button>
+                  {user.role === 'trainer' && (
+                    <div>
+                      <button onClick={() => handleEditClick(workout)}>Edit</button>
+                      <button onClick={() => handleDelete(workout.id)}>Delete</button>
+                    </div>
+                  )}
                   <button onClick={() => handleExportToExcel(selectedWorkoutDetails)}>Export to Excel</button>
                   <button onClick={() => handleAddToCalendar(workout)}>Add to Google Calendar</button>
                 </div>
