@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 4ac4f426c31c
+Revision ID: e688cbaf7f69
 Revises: 
-Create Date: 2024-01-03 23:54:20.966145
+Create Date: 2024-01-04 16:14:24.142159
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4ac4f426c31c'
+revision = 'e688cbaf7f69'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,6 +46,7 @@ def upgrade():
     sa.Column('receiver_id', sa.Integer(), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.Column('is_read', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['receiver_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['sender_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -75,6 +76,9 @@ def upgrade():
     op.create_table('workout_exercises',
     sa.Column('workout_id', sa.Integer(), nullable=False),
     sa.Column('exercise_id', sa.Integer(), nullable=False),
+    sa.Column('reps', sa.String(length=10), nullable=True),
+    sa.Column('sets', sa.Integer(), nullable=True),
+    sa.Column('rest', sa.String(length=10), nullable=True),
     sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ),
     sa.ForeignKeyConstraint(['workout_id'], ['workouts.id'], ),
     sa.PrimaryKeyConstraint('workout_id', 'exercise_id')

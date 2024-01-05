@@ -24,6 +24,7 @@ class MessageSchema(Schema):
     receiver_id = fields.Int(required=True)
     content = fields.Str(required=True, validate=validate.Length(min=1))
     timestamp = fields.DateTime(dump_only=True)
+    is_read = fields.Boolean(dump_only=True) 
 
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)

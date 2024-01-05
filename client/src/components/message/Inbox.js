@@ -1,12 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import MessageModal from './MessageModal'; // Import the MessageModal component
+import MessageModal from './MessageModal';
 
 function Inbox({ currentUserId, authToken }) {
   const [showMessageList, setShowMessageList] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    const fetchUnreadMessagesCount = async () => {
+      try {
+        const response = await axios.get('/api/messages/unread/count', {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        setUnreadMessagesCount(response.data.unread_count);
+      } catch (error) {
+        console.error('Failed to fetch unread messages count.');
+      }
+    };
+
+    fetchUnreadMessagesCount();
+  }, [authToken, showMessageList]); 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -30,13 +45,14 @@ function Inbox({ currentUserId, authToken }) {
 
   const closeMessageList = () => {
     setShowMessageList(false);
+    fetchUnreadMessagesCount(); // Update the count after closing the message list
   };
 
   return (
     <div className="inbox-container">
       {error && <p className="error">{error}</p>}
       <button className="btn-send-message" onClick={openMessageList}>
-        Open Inbox
+        Open Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
       </button>
       <MessageModal isOpen={showMessageList} onClose={closeMessageList} messages={messages} />
     </div>
@@ -44,3 +60,4 @@ function Inbox({ currentUserId, authToken }) {
 }
 
 export default Inbox;
+

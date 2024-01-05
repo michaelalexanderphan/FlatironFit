@@ -28,24 +28,28 @@ function MessageForm({ currentUserId, authToken, role, onMessageSent, showMessag
   const sendMessage = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
-        '/api/messages',
-        {
-          receiver_id: receiverId,
-          content: content,
-        },
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
+        await axios.post(
+            '/api/messages/create',
+            {
+                receiver_id: receiverId,
+                content: content,
+            },
+            {
+                headers: { Authorization: `Bearer ${authToken}` },
+            }
+        );
+        setStatus('Message sent successfully');
+        setReceiverId('');
+        setContent('');
+        if (onMessageSent) {
+            onMessageSent();
         }
-      );
-      setStatus('Message sent successfully');
-      setReceiverId('');
-      setContent('');
-      onMessageSent();
     } catch (error) {
-      setStatus('Failed to send message. Please try again.');
+        console.error('Error sending message:', error);
+        setStatus('Failed to send message. Please try again.');
     }
-  };
+};
+
 
   return (
     <div className="message-form-container">

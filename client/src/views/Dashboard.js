@@ -132,7 +132,7 @@ function Dashboard() {
         </Route>
       </Routes>
       <button className="btn-inbox" onClick={handleOpenInbox}>
-        Inbox {unreadMessagesCount > 0 && <span className="unread-count">{unreadMessagesCount}</span>}
+        Inbox {unreadMessagesCount > 0 && `(${unreadMessagesCount})`}
       </button>
     </div>
   );
