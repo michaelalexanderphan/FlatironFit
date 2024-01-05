@@ -1,103 +1,48 @@
-/* Inbox container */
-.inbox-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background-color: #F44336; /* Red background color */
-    color: #fff; /* White text color */
-  }
-  
-  /* Send Message button */
-  .btn-send-message {
-    background-color: #D32F2F; /* Darker red */
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-  }
-  
-  /* Message Form container */
-  .message-form-container {
-    width: 100%;
-    max-width: 400px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Message Form */
-  .message-form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Select input */
-  .message-form-select {
-    margin-bottom: 10px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  /* Textarea input */
-  .message-form-textarea {
-    margin-bottom: 10px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    resize: vertical;
-    min-height: 100px;
-  }
-  
-  /* Send Message button inside form */
-  .message-form-submit {
-    background-color: #D32F2F; /* Darker red */
-    color: #fff;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 4px;
-  }
-  
-  /* Message Status */
-  .message-status {
-    color: #28a745;
-    margin-top: 10px;
-  }
-  
-  /* Message List container */
-  .message-list-container {
-    width: 100%;
-    max-width: 600px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Message List */
-  .message-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  /* Message Item */
-  .message-item {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 10px;
-    margin-bottom: 10px;
-  }
-  
-  /* Error message */
-  .error {
-    color: #dc3545;
-    font-weight: bold;
-  }
-  
+/* Add these CSS styles to your messaging.css file */
+
+.message-list-container {
+  display: flex;
+}
+
+.senders-list {
+  width: 25%;
+  border-right: 1px solid #ccc;
+  padding: 10px;
+}
+
+.sender-name {
+  cursor: pointer;
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+}
+
+.sender-name:hover {
+  background-color: #f0f0f0;
+}
+
+.conversation-view {
+  flex: 1;
+  padding: 10px;
+}
+
+.conversation-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.messages {
+  overflow-y: auto;
+  max-height: 400px; /* Adjust as needed */
+}
+
+.message-item {
+  background-color: #f0f0f0;
+  padding: 5px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+.unread-message {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}

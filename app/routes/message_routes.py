@@ -15,26 +15,23 @@ class MessageList(Resource):
     @jwt_required()
     def get(self):
         current_user_id = get_jwt_identity()
-        messages = db.session.query(
-            Message.id,
-            Message.content,
-            Message.timestamp,
-            Message.is_read,  # Include is_read in the query
-            User.username.label('sender_username'),
-            User.username.label('receiver_username')
-        ).join(User, User.id == Message.sender_id) \
-            .filter((Message.sender_id == current_user_id) | (Message.receiver_id == current_user_id)) \
-            .all()
+        
+        # Retrieve messages where the current user is either the sender or receiver
+        messages = db.session.query(Message).filter(
+            (Message.sender_id == current_user_id) | (Message.receiver_id == current_user_id)
+        ).all()
+        
         messages_list = [{
             'id': message.id,
             'content': message.content,
             'timestamp': message.timestamp.isoformat(),
-            'is_read': message.is_read,  # Include is_read in the response
-            'sender_username': message.sender_username,
-            'receiver_username': message.receiver_username
+            'is_read': message.is_read,
+            'sender_username': message.sender.username,  # Access the sender's username via relationship
+            'receiver_username': message.receiver.username,  # Access the receiver's username via relationship
         } for message in messages]
 
         return messages_list, 200
+
 class UnreadMessageCount(Resource):
     @jwt_required()
     def get(self):
@@ -85,6 +82,7 @@ class SingleMessage(Resource):
             return message_schema.dump(message), 200
         except ValidationError as err:
             return err.messages, 422
+    
     @jwt_required()
     def patch(self, message_id):
         current_user_id = get_jwt_identity()
@@ -114,6 +112,7 @@ class UserResource(Resource):
         } for user in users]
 
         return users_list, 200
+
 class MessageCreate(Resource):
     @jwt_required()
     def post(self):
@@ -133,10 +132,8 @@ class MessageCreate(Resource):
         except ValidationError as err:
             return err.messages, 422
 
-
 api.add_resource(MessageList, '/messages')
 api.add_resource(SingleMessage, '/messages/<int:message_id>')
 api.add_resource(UserResource, '/users/available')
 api.add_resource(UnreadMessageCount, '/messages/unread/count')
 api.add_resource(MessageCreate, '/messages/create')
-
