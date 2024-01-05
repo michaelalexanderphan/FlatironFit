@@ -1,49 +1,81 @@
-div {
-    display: flex;
+/* Signup Page Styles */
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: #f2f2f2; /* Light gray background */
+  min-height: 100vh;
+}
+
+.signup-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px; /* Adjust the max-width to your desired width */
+}
+
+.signup-heading {
+  color: #ff4d4d;
+  text-align: center;
+  font-size: 24px; /* Increase the font size */
+  margin-bottom: 20px; /* Add some spacing below the heading */
+}
+
+.form-label {
+  font-weight: bold;
+  margin-bottom: 8px; /* Slightly increase the margin */
+  color: #333; /* Darken the text color */
+}
+
+.form-control {
+  width: 100%;
+  padding: 6px; /* Increase the padding for better input field appearance */
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+
+
+.signup-button {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 12px 24px; /* Increase padding for button */
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%; /* Make the button full width */
+  transition: background-color 0.3s; /* Add a smooth hover effect */
+}
+
+.signup-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.signup-button:hover {
+  background: #ff3333; /* Darken the color on hover */
+}
+
+/* Add some spacing between form fields */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .signup-container {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
   }
-  
-  h2 {
-    margin-bottom: 20px;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-  }
-  
-  label {
-    margin-bottom: 5px;
-  }
-  
-  input,
-  select,
-  textarea {
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button:disabled {
-    background-color: #ccc;
-  }
-  
-  p {
-    color: red;
-    margin-top: -15px;
-    margin-bottom: 20px;
-  }
-  
+}
+
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: #0e0a0a; /* Light gray background */
+  min-height: 100vh;
+}

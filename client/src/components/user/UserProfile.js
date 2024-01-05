@@ -83,30 +83,27 @@ function UserProfile() {
   }
 
   return (
-    <div className="user-profile-container">
-      <h2 className="user-profile-heading">User Profile</h2>
-      <div className="user-profile-info">
-        {profileData.id === currentUser.id ? (
-          <>
-            <p><strong>Username:</strong> {profileData.username}</p>
-            <p><strong>Email:</strong> {profileData.email}</p>
-            <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
-            <p><strong>Bio:</strong> {profileData.bio}</p>
-            {!isEditing && <button onClick={handleEditClick} className="edit-profile-button">Edit Profile</button>}
-          </>
-        ) : (
-          <>
-            <p><strong>Username:</strong> {profileData.username}</p>
-            <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
-            <p><strong>Bio:</strong> {profileData.bio}</p>
-          </>
-        )}
-      </div>
+    <div>
+      <h2>User Profile</h2>
+      {profileData.id === currentUser.id ? (
+        <>
+          <p><strong>Username:</strong> {profileData.username}</p>
+          <p><strong>Email:</strong> {profileData.email}</p>
+          <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
+          <p><strong>Bio:</strong> {profileData.bio}</p>
+          {!isEditing && <button onClick={handleEditClick}>Edit Profile</button>}
+        </>
+      ) : (
+        <>
+          <p><strong>Username:</strong> {profileData.username}</p>
+          <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
+          <p><strong>Bio:</strong> {profileData.bio}</p>
+        </>
+      )}
       {currentUser.id === profileData.id && isEditing && (
-        <div className="user-profile-edit-form">
+        <div>
           <h2>Edit Profile</h2>
           <form onSubmit={handleSubmit}>
-            <label htmlFor="contact_info">Contact Info:</label>
             <input
               type="text"
               id="contact_info"
@@ -114,12 +111,9 @@ function UserProfile() {
               value={formData.contact_info}
               onChange={handleChange}
             />
-            <label htmlFor="bio">Bio:</label>
             <textarea id="bio" name="bio" value={formData.bio} onChange={handleChange} />
-            <div className="form-buttons">
-              <button type="submit" className="save-changes-button">Save Changes</button>
-              <button type="button" onClick={handleCancel} className="cancel-button">Cancel</button>
-            </div>
+            <button type="submit">Save Changes</button>
+            <button type="button" onClick={handleCancel}>Cancel</button>
           </form>
         </div>
       )}

@@ -1,31 +1,11 @@
-.login-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 20px;
-    background: #ff4d4d; 
-  }
-  
-  .login-box, .info-box {
+
+  .info-box {
     background: #ffffff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
-  
-  .login-form .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .login-form input[type="text"],
-  .login-form input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .login-button, .learn-more-button {
+  .learn-more-button {
     background: #ff4d4d; 
     color: white;
     border: none;
@@ -33,15 +13,63 @@
     border-radius: 4px;
     cursor: pointer;
   }
-  
-  .login-button:disabled,
-  .learn-more-button:disabled {
-    background: #ccc;
+
+  /* Login Page Styles */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: #0e0a0a; /* Background color similar to the home page */
+  min-height: 100vh;
+}
+
+.login-box {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px; /* Adjust the max-width to your desired width */
+}
+
+
+.welcome-heading {
+  color: #ff4d4d;
+}
+
+.form-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #ff4d4d; /* Text color similar to the home page */
+}
+
+.form-control {
+  width: 100%;
+  padding: 6px; /* Smaller padding */
+  border: 1px solid #ccc;
+  border-radius: 3px; /* Smaller border radius */
+  margin-bottom: 8px; /* Smaller margin */
+}
+
+
+
+.login-button {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.login-button:disabled {
+  background: #ccc;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
   }
-  
-  @media (max-width: 768px) {
-    .login-container {
-      flex-direction: column;
-    }
-  }
-  
+}

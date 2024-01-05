@@ -19,6 +19,7 @@ function Dashboard() {
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [fetchedMessages, setFetchedMessages] = useState([]);
   const [users, setUsers] = useState([]);
+  const [selectedMessage, setSelectedMessage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -81,6 +82,34 @@ function Dashboard() {
     }
   };
 
+  const handleCardClick = (message) => {
+    // Mark the message as read in the database
+    markMessagesAsRead([message]); // Pass the selected message to mark as read
+
+    // Set the selected message and show the message form
+    setSelectedMessage(message);
+    setShowMessageForm(true);
+  };
+
+  const markMessagesAsRead = async (messages) => {
+    const unreadMessages = messages.filter(
+      (m) => !m.is_read && m.receiver_id === user?.id
+    );
+    if (unreadMessages.length > 0) {
+      await axios.patch(
+        `/api/messages/read`,
+        {
+          messageIds: unreadMessages.map((m) => m.id),
+        },
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }
+      );
+      // Refetch messages or update the state as needed
+      // fetchMessages();
+    }
+  };
+
   return (
     <div className="container-fluid">
       <Navbar onOpenInbox={handleOpenInbox} unreadMessagesCount={unreadMessagesCount} />
@@ -105,12 +134,14 @@ function Dashboard() {
                 onClose={toggleMessageForm}
                 role={user?.role}
                 users={users}
+                selectedMessage={selectedMessage}
               />
             )}
             {fetchedMessages.map((message) => (
               <div
                 key={message.id}
                 className={`messaging-card ${!message.is_read ? 'unread-message' : ''}`}
+                onClick={() => handleCardClick(message)}
               >
                 <p className="font-weight-bold">From: {message.sender_username}</p>
                 <p className="font-weight-bold">To: {message.receiver_username}</p>
@@ -123,7 +154,6 @@ function Dashboard() {
       </Routes>
     </div>
   );
-  
 }
 
 export default Dashboard;

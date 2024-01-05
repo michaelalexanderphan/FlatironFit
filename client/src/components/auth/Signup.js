@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { validateEmail, validatePassword } from '../utils/validations';
-
+import '../../styling/Signup.css';
 function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -63,103 +63,102 @@ function Signup() {
   };
 
   return (
-    <div className="container">
-      <div className="row justify-content-center align-items-center min-vh-100">
-        <div className="col-md-6">
-          <div className="card p-4">
-            <h2 className="text-center mb-4">Signup</h2>
-            <form onSubmit={handleSignup}>
-              <div className="mb-3">
-                <label htmlFor="username" className="form-label">Username</label>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isLoading}
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="contactInfo" className="form-label">Contact Info</label>
-                <input
-                  id="contactInfo"
-                  type="text"
-                  value={contactInfo}
-                  onChange={(e) => setContactInfo(e.target.value)}
-                  disabled={isLoading}
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="bio" className="form-label">Bio</label>
-                <textarea
-                  id="bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  disabled={isLoading}
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="role" className="form-label">Role</label>
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  disabled={isLoading}
-                  className="form-select"
-                >
-                  <option value="client">Client</option>
-                  <option value="trainer">Trainer</option>
-                </select>
-              </div>
-              {role === 'trainer' && (
-                <div className="mb-3">
-                  <label htmlFor="secretCode" className="form-label">Secret Code (for trainers only)</label>
-                  <input
-                    id="secretCode"
-                    type="text"
-                    value={secretCode}
-                    onChange={(e) => setSecretCode(e.target.value)}
-                    disabled={isLoading}
-                    className="form-control"
-                    placeholder="Enter secret code"
-                  />
-                </div>
-              )}
-              <button type="submit" disabled={isLoading} className="btn btn-primary">
-                {isLoading ? 'Signing up...' : 'Sign Up'}
-              </button>
-            </form>
-            {error && <p className="text-danger mt-3">{error}</p>}
+    <div className="signup-container"> {/* Updated class name */}
+      <div className="signup-card">
+        <h2 className="signup-heading text-center mb-4">Signup</h2>
+        <form onSubmit={handleSignup}>
+          <div className="mb-3">
+            <label htmlFor="username" className="form-label">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={isLoading}
+              className="form-control"
+            />
           </div>
-        </div>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="contactInfo" className="form-label">Contact Info</label>
+            <input
+              id="contactInfo"
+              type="text"
+              value={contactInfo}
+              onChange={(e) => setContactInfo(e.target.value)}
+              disabled={isLoading}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="bio" className="form-label">Bio</label>
+            <textarea
+              id="bio"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              disabled={isLoading}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="role" className="form-label">Role</label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              disabled={isLoading}
+              className="form-select"
+            >
+              <option value="client">Client</option>
+              <option value="trainer">Trainer</option>
+            </select>
+          </div>
+          {role === 'trainer' && (
+            <div className="mb-3">
+              <label htmlFor="secretCode" className="form-label">Secret Code (for trainers only)</label>
+              <input
+                id="secretCode"
+                type="text"
+                value={secretCode}
+                onChange={(e) => setSecretCode(e.target.value)}
+                disabled={isLoading}
+                className="form-control"
+                placeholder="Enter secret code"
+              />
+            </div>
+          )}
+          <button type="submit" disabled={isLoading} className="signup-button">
+            {isLoading ? 'Signing up...' : 'Sign Up'}
+          </button>
+          <Link to="/" className="btn btn-secondary ms-2">Back</Link>
+        </form>
+        {error && <p className="text-danger mt-3">{error}</p>}
       </div>
     </div>
   );
+  
 }
 
 export default Signup;
+

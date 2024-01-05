@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link for the back button
 import '../../styling/Login.css';
 
 function Login() {
@@ -11,8 +11,6 @@ function Login() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -39,12 +37,12 @@ function Login() {
   };
 
   return (
-    <div className="container">
+    <div className="login-container">
       <div className="row justify-content-center align-items-center min-vh-100">
         <div className="col-md-6">
-          <div className="card p-4">
-            <h2 className="text-center mb-4">Login</h2>
-            <form onSubmit={handleLogin}>
+          <div className="card p-4 login-box">
+            <h2 className="text-center mb-4 welcome-heading">Login</h2>
+            <form onSubmit={handleLogin} className="login-form">
               <div className="mb-3">
                 <label htmlFor="username" className="form-label">Username</label>
                 <input
@@ -67,9 +65,12 @@ function Login() {
                   className="form-control"
                 />
               </div>
-              <button type="submit" disabled={isLoading} className="btn btn-primary">
-                {isLoading ? 'Logging in...' : 'Log In'}
-              </button>
+              <div className="d-flex justify-content-between align-items-center">
+                <button type="submit" disabled={isLoading} className="btn btn-primary login-button">
+                  {isLoading ? 'Logging in...' : 'Log In'}
+                </button>
+                <Link to="/" className="btn btn-secondary back-button">Back</Link> {/* Back button */}
+              </div>
             </form>
           </div>
         </div>
