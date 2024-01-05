@@ -1,57 +1,41 @@
-.message-list-container {
+.message-form-container {
+  background-color: #0d1117;
+  color: #c9d1d9;
+  padding: 20px;
+  border-top: 1px solid #30363d;
+}
+
+.message-form {
   display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.senders-list {
-  width: 200px; /* Adjust width as necessary */
-  margin-right: 20px;
-}
-
-.sender-name {
-  cursor: pointer;
+.message-form-select,
+.message-form-textarea {
+  width: 100%;
   padding: 10px;
-  border-bottom: 1px solid #30363d;
-  color: #c9d1d9;
-}
-
-.sender-name.unread {
-  font-weight: bold;
-}
-
-.sender-name:hover {
-  background-color: #161b22;
-}
-
-.unread-indicator {
-  color: #ff4d4d;
-  margin-left: 5px;
-}
-
-.conversation-view {
-  flex-grow: 1;
-}
-
-.conversation-header {
-  padding: 10px;
-  border-bottom: 1px solid #30363d;
-  color: #c9d1d9;
-}
-
-.messages {
-  padding: 10px;
-}
-
-.message-item {
-  padding: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #30363d;
   border-radius: 5px;
+  background-color: #161b22;
+  color: #c9d1d9;
 }
 
-.unread-message {
+.message-form-submit {
   background-color: #f04a4a;
-  color: #0d1117;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
-.sender-name.active {
-  background-color: #161b22; /* Active conversation background */
-  color: #ff4d4d; /* Active conversation text color */
+
+.message-form-submit:hover {
+  background-color: #e0979d;
+}
+
+.message-status {
+  margin-top: 10px;
+  color: #ff4d4d;
 }

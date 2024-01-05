@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import './UserProfile.css';
 
 function UserProfile() {
   const { user: currentUser, token } = useContext(AuthContext);
@@ -82,27 +83,30 @@ function UserProfile() {
   }
 
   return (
-    <div>
-      <h2>User Profile</h2>
-      {profileData.id === currentUser.id ? (
-        <>
-          <p><strong>Username:</strong> {profileData.username}</p>
-          <p><strong>Email:</strong> {profileData.email}</p>
-          <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
-          <p><strong>Bio:</strong> {profileData.bio}</p>
-          {!isEditing && <button onClick={handleEditClick}>Edit Profile</button>}
-        </>
-      ) : (
-        <>
-          <p><strong>Username:</strong> {profileData.username}</p>
-          <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
-          <p><strong>Bio:</strong> {profileData.bio}</p>
-        </>
-      )}
+    <div className="user-profile-container">
+      <h2 className="user-profile-heading">User Profile</h2>
+      <div className="user-profile-info">
+        {profileData.id === currentUser.id ? (
+          <>
+            <p><strong>Username:</strong> {profileData.username}</p>
+            <p><strong>Email:</strong> {profileData.email}</p>
+            <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
+            <p><strong>Bio:</strong> {profileData.bio}</p>
+            {!isEditing && <button onClick={handleEditClick} className="edit-profile-button">Edit Profile</button>}
+          </>
+        ) : (
+          <>
+            <p><strong>Username:</strong> {profileData.username}</p>
+            <p><strong>Contact Info:</strong> {profileData.contact_info}</p>
+            <p><strong>Bio:</strong> {profileData.bio}</p>
+          </>
+        )}
+      </div>
       {currentUser.id === profileData.id && isEditing && (
-        <div>
+        <div className="user-profile-edit-form">
           <h2>Edit Profile</h2>
           <form onSubmit={handleSubmit}>
+            <label htmlFor="contact_info">Contact Info:</label>
             <input
               type="text"
               id="contact_info"
@@ -110,9 +114,12 @@ function UserProfile() {
               value={formData.contact_info}
               onChange={handleChange}
             />
+            <label htmlFor="bio">Bio:</label>
             <textarea id="bio" name="bio" value={formData.bio} onChange={handleChange} />
-            <button type="submit">Save Changes</button>
-            <button type="button" onClick={handleCancel}>Cancel</button>
+            <div className="form-buttons">
+              <button type="submit" className="save-changes-button">Save Changes</button>
+              <button type="button" onClick={handleCancel} className="cancel-button">Cancel</button>
+            </div>
           </form>
         </div>
       )}

@@ -1,4 +1,3 @@
-/* Workout Plan Cards */
 .workout-card {
     background: #161b22;
     border-radius: 8px;
@@ -13,7 +12,6 @@
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
   }
   
-  /* Workout Plan Title */
   .workout-title {
     display: flex;
     align-items: center;
@@ -22,13 +20,13 @@
     margin-bottom: 10px;
   }
   
-  /* Icons */
+  
   .workout-icon {
     margin-right: 10px;
-    /* Add icons via CSS or inline in the HTML */
+    
   }
   
-  /* Button Styles */
+  
   .button-primary {
     background-color: #f04a4a;
     color: white;
@@ -43,24 +41,22 @@
     background-color: #e0979d;
   }
   
-  /* Typography */
+  
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
   
   h1, h2, h3, h4, h5, h6, .workout-title {
     font-family: 'Roboto', sans-serif;
   }
   
-  /* Add this to your existing container styles */
+  
   .container-fluid {
     padding: 20px;
   }
   
-  /* Add this for consistent color scheme */
   .nav-link, .button-primary {
-    background-color: #f04a4a; /* Or other color of your choice */
+    background-color: #f04a4a; 
   }
   
-  /* Add this for better spacing and alignment */
   .row, .column {
     display: flex;
     align-items: center;

@@ -85,6 +85,7 @@ function Dashboard() {
     <div className="container-fluid">
       <Navbar onOpenInbox={handleOpenInbox} unreadMessagesCount={unreadMessagesCount} />
       <div className="dashboard-header">
+        {/* Your dashboard header content */}
       </div>
       <Routes>
         <Route path="/" element={<Outlet />} />
@@ -93,7 +94,7 @@ function Dashboard() {
         <Route path="exercises" element={<Exercises />} />
         <Route path="messaging" element={
           <div>
-            <button className="btn btn-primary mb-3" onClick={toggleMessageForm}>
+            <button className="btn btn-primary mb-3 send-message-button" onClick={toggleMessageForm}>
               Send Message
             </button>
             {showMessageList && <Messaging currentUserId={user?.id} authToken={authToken} />}
@@ -107,7 +108,10 @@ function Dashboard() {
               />
             )}
             {fetchedMessages.map((message) => (
-              <div key={message.id} className="border p-3 mb-3">
+              <div
+                key={message.id}
+                className={`messaging-card ${!message.is_read ? 'unread-message' : ''}`}
+              >
                 <p className="font-weight-bold">From: {message.sender_username}</p>
                 <p className="font-weight-bold">To: {message.receiver_username}</p>
                 <p>{message.content}</p>
@@ -119,6 +123,7 @@ function Dashboard() {
       </Routes>
     </div>
   );
+  
 }
 
 export default Dashboard;

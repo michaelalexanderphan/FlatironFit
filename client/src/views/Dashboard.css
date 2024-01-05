@@ -37,7 +37,7 @@
     hover: #f13d3d;
     padding: 10px 15px;
     text-decoration: none;
-    margin-right: 20px; /* Adjust as needed */
+    margin-right: 20px; 
   }
   
   .nav-link:hover {
@@ -94,5 +94,71 @@
     .display-4 {
       margin-bottom: 20px;
     }
+  }
+  
+  .dashboard-header {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .btn-primary {
+    background-color: #f04a4a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .btn-primary:hover {
+    background-color: #e0979d;
+  }
+  
+  .messaging-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px; /* Add padding to match the rest of your layout */
+    background-color: #0d1117; /* Match the background color of your container */
+    color: #c9d1d9; /* Match the text color of your container */
+  }
+  
+.messaging-card {
+    background-color: #161b22; /* Match the background color of your cards */
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .messaging-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Styling for sender and receiver names */
+  .messaging-card .font-weight-bold {
+    font-weight: bold;
+    color: #58a6ff; /* Match the text color of your title */
+  }
+  
+  /* Styling for message content */
+  .messaging-card p {
+    margin: 10px 0;
+    color: #c9d1d9; /* Match the text color of your container */
+  }
+  
+  /* Styling for unread messages */
+  .messaging-card.unread-message {
+    background-color: #161b22; /* Change background color for unread messages */
+    color: white; /* Change text color for unread messages */
   }
   

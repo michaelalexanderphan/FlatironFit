@@ -4,8 +4,9 @@ import './messaging.css';
 
 function MessageList({ currentUserId, authToken }) {
   const [conversations, setConversations] = useState({});
-  const [activeConversationId, setActiveConversationId] = useState(null); // Changed variable name for clarity
+  const [activeConversationId, setActiveConversationId] = useState(null);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(true); // Define the mounted state
 
   const fetchMessages = async () => {
     try {
@@ -13,19 +14,31 @@ function MessageList({ currentUserId, authToken }) {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       const grouped = groupMessagesBySender(response.data);
-      setConversations(grouped);
-    } catch (error) {
-      setError('Failed to fetch messages.');
+      if (mounted) {
+        setConversations(grouped);
+      }
+    } catch (err) {
+      if (mounted) {
+        setError('Failed to fetch messages.');
+      }
     }
   };
 
   useEffect(() => {
     fetchMessages();
+
+    return () => {
+      // Cleanup to avoid setting state on unmounted component
+      setMounted(false);
+    };
   }, [authToken, currentUserId]);
 
   const groupMessagesBySender = (messages) => {
     return messages.reduce((groups, message) => {
-      const senderId = message.sender_id === currentUserId ? message.receiver_id : message.sender_id;
+      const senderId =
+        message.sender_id === currentUserId
+          ? message.receiver_id
+          : message.sender_id;
       if (!groups[senderId]) {
         groups[senderId] = {
           sender: message.sender_username,
@@ -42,19 +55,25 @@ function MessageList({ currentUserId, authToken }) {
   };
 
   const selectConversation = (senderId) => {
-    setActiveConversationId(senderId); 
+    setActiveConversationId(senderId);
     markMessagesAsRead(conversations[senderId].messages);
   };
 
   const markMessagesAsRead = async (messages) => {
-    const unreadMessages = messages.filter(m => !m.is_read && m.receiver_id === currentUserId);
+    const unreadMessages = messages.filter(
+      (m) => !m.is_read && m.receiver_id === currentUserId
+    );
     if (unreadMessages.length > 0) {
-      await axios.patch(`/api/messages/read`, {
-        messageIds: unreadMessages.map(m => m.id)
-      }, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      fetchMessages(); // re-fetch messages to update the state after marking as read
+      await axios.patch(
+        `/api/messages/read`,
+        {
+          messageIds: unreadMessages.map((m) => m.id),
+        },
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }
+      );
+      fetchMessages();
     }
   };
 
@@ -63,9 +82,17 @@ function MessageList({ currentUserId, authToken }) {
       {error && <p className="error">{error}</p>}
       <div className="senders-list">
         {Object.keys(conversations).map((senderId) => (
-          <div key={senderId} onClick={() => selectConversation(senderId)} className={`sender-name ${conversations[senderId].unread ? 'unread' : ''} ${activeConversationId === senderId ? 'active' : ''}`}>
+          <div
+            key={senderId}
+            onClick={() => selectConversation(senderId)}
+            className={`sender-name ${
+              conversations[senderId].unread ? 'unread' : ''
+            } ${activeConversationId === senderId ? 'active' : ''}`}
+          >
             {conversations[senderId].sender}
-            {conversations[senderId].unread && <span className="unread-indicator"> • </span>}
+            {conversations[senderId].unread && (
+              <span className="unread-indicator"> • </span>
+            )}
           </div>
         ))}
       </div>
@@ -76,7 +103,12 @@ function MessageList({ currentUserId, authToken }) {
           </div>
           <div className="messages">
             {conversations[activeConversationId].messages.map((message) => (
-              <div key={message.id} className={`message-item ${!message.is_read ? 'unread-message' : ''}`}>
+              <div
+                key={message.id}
+                className={`message-item ${
+                  !message.is_read ? 'unread-message' : ''
+                }`}
+              >
                 {message.content}
               </div>
             ))}
